@@ -2,7 +2,7 @@ from alterar_dados_da_conta import Alterar_senha, Alterar_nome_de_usuario, Alter
 from cadastro_conta import Conectar_Banco, Criar_Tabela, Validacao_Cadastro, Cadastrar_Conta
 from colorama import Fore, Style, init
 
-
+# Menu improvisado usando o while
 while True:
 
     print(Fore.GREEN + 'Digite 1 - Cadastrar nova conta')
