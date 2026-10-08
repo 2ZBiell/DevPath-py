@@ -31,16 +31,23 @@ SET email = ?
 WHERE id = ?
 ''', (novo_email, id)) # Parte onde o email será alterado de acordo com o id do usuário.
         conexao.commit()
-        print(Fore.GREEN + '\n--EMAIL ALTERADO!--' + Style.RESET_ALL)
-        return True
+
+        print(Fore.GREEN + '\n--EMAIL ALTERADO!--\n' + Style.RESET_ALL)
+        print(Fore.GREEN + 'Digite - 1 para realizar outra operação.')
+        print('Digite qualquer coisa para parar o programa.' + Style.RESET_ALL)
+        voltar = input(Fore.CYAN + '\nOpção: ' + Style.RESET_ALL).strip()
+        if voltar == '1':
+            return True
+        else:
+            return False
     
     elif novo_email == email and not usuario:
-        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS!--' + Style.RESET_ALL) # Caso o email seja igual ao antigo e as credenciais estejam erradas.
-        return False
+        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS, TENTE NOVAMENTE!--' + Style.RESET_ALL) # Caso o email seja igual ao antigo e as credenciais estejam erradas.
+        return True
     
     elif novo_email == email:
         print(Fore.RED + '\n--EMAIL NOVO IGUAL AO ATUAL!--' + Style.RESET_ALL) # Caso o email seja igual ao antigo e as credenciais estejam corretas.
-        return False
+        return True
 
     
 """Função para alterar o nome do Usuário. 
@@ -69,18 +76,24 @@ UPDATE usuarios
 SET nome_de_usuario = ?
 WHERE id = ? 
 ''', (novo_username, id)) # Parte onde o nome de usuário será alterado de acordo com o id do usuário.
-        
         conexao.commit()
-        print(Fore.GREEN + '\n--USUÁRIO ALTERADO!--' + Style.RESET_ALL) 
-        return True
+
+        print(Fore.GREEN + '\n--USUÁRIO ALTERADO!--\n' + Style.RESET_ALL) 
+        print(Fore.GREEN + 'Digite - 1 para realizar outra operação.')
+        print('Digite qualquer coisa para parar o programa.' + Style.RESET_ALL)
+        voltar = input(Fore.CYAN + '\nOpção: ' + Style.RESET_ALL).strip()
+        if voltar == '1':
+            return True
+        else:
+            return False
     
     elif novo_username == nome_de_usuario and not usuario:
-        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS!--' + Style.RESET_ALL) # Caso o nome de usuário seja igual ao antigo e as credencieis estejam incorretas. 
-        return False
+        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS, TENTE NOVAMENTE!--' + Style.RESET_ALL) # Caso o nome de usuário seja igual ao antigo e as credencieis estejam incorretas. 
+        return True
     
     elif novo_username == nome_de_usuario:
         print(Fore.RED + '\n--NOME DE USUÁRIO NOVO IGUAL AO ANTIGO!--' + Style.RESET_ALL) # Caso o nome de usuário seja igual ao antigo e as credenciais estejam corretas.
-        return False
+        return True
 
 
 """Função para alterar a senha.
@@ -110,15 +123,21 @@ UPDATE usuarios
 SET senha = ?
 WHERE id = ?
 ''',(nova_senha, id)) # Parte onde a senha será alterada de acordo com o id do usuário.
-        
         conexao.commit()
-        print(Fore.GREEN + '\n--SENHA ALTERADA COM SUCESSO!--' + Style.RESET_ALL)
-        return True 
+
+        print(Fore.GREEN + '\n--SENHA ALTERADA COM SUCESSO!--\n' + Style.RESET_ALL)
+        print(Fore.GREEN + 'Digite - 1 para realizar outra operação.')
+        print('Digite qualquer coisa para parar o programa.' + Style.RESET_ALL)
+        voltar = input(Fore.CYAN + '\nOpção: ' + Style.RESET_ALL).strip()
+        if voltar == '1':
+            return True
+        else:
+            return False
     
     elif nova_senha == senha and not usuario:
-        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS!--' + Style.RESET_ALL) # Caso as senhas sejam iguais mas o usuário não foi encontrado. 
-        return False   
+        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS, TENTE NOVAMENTE!--' + Style.RESET_ALL) # Caso as senhas sejam iguais mas o usuário não foi encontrado. 
+        return True   
     
     elif nova_senha == senha: 
         print(Fore.RED + '\n--SENHAS IGUAIS, NADA SERÁ ALTERADO!--' + Style.RESET_ALL) # Caso as senhas sejam iguais e o usuário foi encontrado.
-        return False
+        return True
