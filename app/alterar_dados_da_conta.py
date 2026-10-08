@@ -21,7 +21,7 @@ WHERE email = ?
 AND senha = ?
 ''', (email, senha) # Parte de indenticar qual a conta o usuário quer alterar.
 )
-    usuario = cursor.fetchone()
+    usuario = cursor.fetchone() # Caso as Credenciais estejam corretas ele ira encontrar um id e selecionar ele pra váriavel.
 
     if '@' in novo_email and novo_email != email and usuario: # O email deve ter '@', ser diferente do antigo e o usuário deve ser encontrado.
         id = usuario[0]
@@ -36,7 +36,7 @@ WHERE id = ?
     
     elif novo_email == email and not usuario:
         print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS!--' + Style.RESET_ALL) # Caso o email seja igual ao antigo e as credenciais estejam erradas.
-        return True
+        return False
     
     elif novo_email == email:
         print(Fore.RED + '\n--EMAIL NOVO IGUAL AO ATUAL!--' + Style.RESET_ALL) # Caso o email seja igual ao antigo e as credenciais estejam corretas.
