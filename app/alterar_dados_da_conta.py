@@ -10,7 +10,7 @@ def Alterar_email():
     conexao = Conectar_Banco()
     cursor = conexao.cursor()
 
-    print(Fore.GREEN + '--ALTERANDO EMAIL--\n' + Style.RESET_ALL)
+    print(Fore.GREEN + '\n--ALTERANDO EMAIL--\n' + Style.RESET_ALL)
     email = input(Fore.CYAN + 'Digite seu email atual: ' + Style.RESET_ALL).strip()
     senha = input(Fore.CYAN + 'Digite sua senha: ' + Style.RESET_ALL).strip()
     novo_email = input(Fore.CYAN + 'Digite o novo email para troca: ' + Style.RESET_ALL).strip()
@@ -56,7 +56,7 @@ def Alterar_nome_de_usuario():
     conexao = Conectar_Banco()
     cursor = conexao.cursor()
 
-    print(Fore.GREEN + '--ALTERANDO NOME DE USUÁRIO--\n' + Style.RESET_ALL)
+    print(Fore.GREEN + '\n--ALTERANDO NOME DE USUÁRIO--\n' + Style.RESET_ALL)
     nome_de_usuario = input(Fore.CYAN + 'Digite seu nome de usuário atual: ' + Style.RESET_ALL).strip()
     senha = input(Fore.CYAN + 'Digite sua senha: ' + Style.RESET_ALL).strip()
     novo_username = input(Fore.CYAN + 'Digite o novo nome de usuário para troca: ' + Style.RESET_ALL).strip()
@@ -103,10 +103,10 @@ def Alterar_senha():
     conexao = Conectar_Banco()
     cursor = conexao.cursor()
 
-    print(Fore.GREEN + '--ALTERANDO SENHA--\n' + Style.RESET_ALL)
+    print(Fore.GREEN + '\n--ALTERANDO SENHA--\n' + Style.RESET_ALL)
     email = input(Fore.CYAN + 'Digite seu email atual: ' + Style.RESET_ALL).strip()
     senha = input(Fore.CYAN + 'Digite sua senha: ' + Style.RESET_ALL).strip()
-    nova_senha = input(Fore.CYAN + 'Digite sua nova senha para troca: ' + Style.RESET_ALL).strip()  
+    nova_senha = input(Fore.CYAN + 'Digite sua nova senha para troca(MIN-8 MAX-20): ' + Style.RESET_ALL).strip()  
 
     cursor.execute('''
 SELECT id FROM usuarios
@@ -116,7 +116,7 @@ AND senha = ?
 
     usuario = cursor.fetchone() # Caso as Credenciais estejam corretas ele ira encontrar um id e selecionar ele pra váriavel.
 
-    if nova_senha != senha and usuario: # Senha nova deve ser diferente e o usuário deve ser encontrado.
+    if 8 <= len(nova_senha) <= 20 and nova_senha != senha and usuario: # Senha nova deve seguir o padrao e ser diferente da antiga e o usuário deve ser encontrado.
         id = usuario[0]
         cursor.execute('''
 UPDATE usuarios
@@ -133,6 +133,9 @@ WHERE id = ?
             return True
         else:
             return False
+
+    elif len(nova_senha) < 8 or len(nova_senha) > 20 and not usuario:
+        print(Fore.RED + '\n--SENHA FORA DO PADRÃO!--' + Style.RESET_ALL)
     
     elif nova_senha == senha and not usuario:
         print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS, TENTE NOVAMENTE!--' + Style.RESET_ALL) # Caso as senhas sejam iguais mas o usuário não foi encontrado. 
