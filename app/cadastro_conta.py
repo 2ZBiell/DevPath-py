@@ -91,4 +91,3 @@ def ValidarLogin(nome_de_usuario, senha):
     
     finally:
         conexao.close()
-        
