@@ -3,6 +3,11 @@ import sqlite3
 from cadastro_conta import Conectar_Banco
 
 def Exibir_dados_usuário():
+    '''O usuário irá digitar o email e a senha, para que o cursor
+    faça uma pesquisa dentro do banco de dados, e selecione uma 
+    conta em forma de lista, e após isso a função irá 
+    printar os dados do usuário de acordo com o index dele na lista.    
+    '''
     conexao = Conectar_Banco()
     cursor = conexao.cursor()
 
