@@ -83,7 +83,7 @@ A estrutura poderá ser modificada conforme novas funcionalidades forem implemen
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/2ZBiell/DevPath.git
+git clone https://github.com/2ZBiell/DevPath-py.git
 ```
 
 ### 2. Acessar a pasta do projeto
