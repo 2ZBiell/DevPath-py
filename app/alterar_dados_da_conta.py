@@ -4,9 +4,14 @@ def Conectar_Banco():
     return sqlite3.connect("data/usuarios.db")
 
 
-"""Função para alterar email. 
-Usando o email antigo e a senha para indentificar a conta."""
+
 def Alterar_email():
+    """Função para alterar email. 
+Usando o email antigo e senha, para o cursor procurar uma conta na tabela.
+Então ele irá selecionar a conta em forma de lista
+onde será selecionado somente o primeiro elemento da lista que é o id da conta,
+para ser utilizado como identificador na parte de atualizar o email.
+"""
     conexao = Conectar_Banco()
     cursor = conexao.cursor()
 
@@ -50,9 +55,14 @@ WHERE id = ?
         return True
 
     
-"""Função para alterar o nome do Usuário. 
-Usando o nome antigo e a senha para indentificar a conta."""
+
 def Alterar_nome_de_usuario():
+    """Função para alterar o nome do Usuário. 
+Usando o nome de usuário e a senha, para o cursor procurar uma conta na tabela.
+Então ele irá selecionar a conta em forma de lista
+onde será selecionado somente o primeiro elemento da lista que é o id da conta,
+para ser utilizado como identificador na parte de atualizar o nome de usuário.
+"""
     conexao = Conectar_Banco()
     cursor = conexao.cursor()
 
@@ -96,9 +106,14 @@ WHERE id = ?
         return True
 
 
-"""Função para alterar a senha.
-Usando o email e senha antiga para indentificar a conta."""
+
 def Alterar_senha():
+    """Função para alterar a senha.
+Usando o email e senha antiga, para o cursor procurar uma conta na tabela. 
+Então ele irá selecionar a conta em forma de lista
+onde será selecionado somente o primeiro elemento da lista que é o id da conta,
+para ser utilizado como identificador na parte de atualizar a senha.
+"""
 
     conexao = Conectar_Banco()
     cursor = conexao.cursor()
@@ -134,13 +149,14 @@ WHERE id = ?
         else:
             return False
 
-    elif len(nova_senha) < 8 or len(nova_senha) > 20 and not usuario:
+    elif 8 < len(nova_senha) > 20 and usuario:
         print(Fore.RED + '\n--SENHA FORA DO PADRÃO!--' + Style.RESET_ALL)
+        return True
     
-    elif nova_senha == senha and not usuario:
+    elif not usuario:
         print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS, TENTE NOVAMENTE!--' + Style.RESET_ALL) # Caso as senhas sejam iguais mas o usuário não foi encontrado. 
         return True   
     
-    elif nova_senha == senha: 
+    elif nova_senha == senha and usuario: 
         print(Fore.RED + '\n--SENHAS IGUAIS, NADA SERÁ ALTERADO!--' + Style.RESET_ALL) # Caso as senhas sejam iguais e o usuário foi encontrado.
         return True
