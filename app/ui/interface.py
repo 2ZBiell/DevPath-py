@@ -1,6 +1,7 @@
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Input, Button, Static
+from app.buscar import BuscarCursos
 from app.cadastro_conta import Cadastrar_Conta, ValidarLogin
 from textual.containers import Vertical
 from app.alterar_dados_da_conta import Alterar_email, Alterar_nome_de_usuario, Alterar_senha
@@ -40,10 +41,9 @@ class TelaCursos(Screen):
     """
 
     def compose(self):
-        yield Input(
-            placeholder="Digite o nome do curso. . .",
-            id="nome"
-        ) 
+        yield Static("BUSCAR CURSOS")
+        yield Input(placeholder="Digite o nome do curso. . .", id="nome")
+        yield Static("", id="resultados") 
         yield Button("Buscar", id="busca")
         yield Button("← Voltar", id="voltar")
 
@@ -51,6 +51,25 @@ class TelaCursos(Screen):
         if event.button.id == "voltar":
             self.app.pop_screen()
             return
+
+        if event.button.id == "busca":
+            nome = self.query_one("#nome", Input).value.strip()
+
+            resultados = BuscarCursos(nome_do_curso=nome)
+
+            area_resultados = self.query_one("#resultados", Static)
+
+            if resultados:
+                texto = "\n\n".join(
+                    " | ".join(str(valor) for valor in curso)
+                    for curso in resultados
+                )
+
+                area_resultados.update(texto)
+
+            else:
+                area_resultados.update("Nenhum curso encontrado.")
+
 
 class TelaMenu(Screen):
 

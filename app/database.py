@@ -14,7 +14,7 @@ def Tabela_Cursos():
             nome_do_curso TEXT NOT NULL,
             plataforma TEXT NOT NULL,
             linguagem TEXT NOT NULL,
-            gratuito INTEGER NOT NULL CHECK (gratuito IN 0, 1)
+            gratuito BOOLEAN DEFAULT 0
     ) 
     """)
 

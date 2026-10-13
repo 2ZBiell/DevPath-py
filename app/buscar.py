@@ -1,4 +1,4 @@
-from database import Tabela_Cursos, ConectarCursos
+from app.database import Tabela_Cursos, ConectarCursos
 # lógica de busca do DevPath + filtragem dinâmica
 
 def BuscarCursos(
@@ -7,33 +7,37 @@ def BuscarCursos(
     linguagem=None,
     gratuito=None
 ):
-    
+       
     conexao = ConectarCursos()
-    cursor = conexao.cursor()
 
-    sql = """
-        SELECT *
-        FROM cursos
-        WHERE nome_do_curso LIKE ?
-    """
+    try:
+        cursor = conexao.cursor()
 
-    parametros = [f'%{nome_do_curso}%']
+        sql = """
+            SELECT *
+            FROM cursos
+            WHERE nome_do_curso LIKE ?
+        """
 
-    if plataforma is not None:
-        sql += " AND plataforma = ?"
-        parametros.append(plataforma)
+        parametros = [f'%{nome_do_curso}%']
 
-    if linguagem is not None:
-        sql += " AND linguagem = ?"
-        parametros.append(linguagem)
+        if plataforma is not None:
+            sql += " AND plataforma = ?"
+            parametros.append(plataforma)
 
-    if gratuito is not None:
-        sql += " AND gratuito = ?"
-        parametros.append(linguagem)
+        if linguagem is not None:
+            sql += " AND linguagem = ?"
+            parametros.append(linguagem)
 
-    cursos.execute(sql, parametros)
+        if gratuito is not None:
+            sql += " AND gratuito = ?"
+            parametros.append(gratuito)
 
-    resultados = cursor.fetchall()
+        cursor.execute(sql, parametros)
 
-    conexao.close()
-    return resultados  
+        resultados = cursor.fetchall()
+
+        return resultados 
+    
+    finally:
+        conexao.close() 

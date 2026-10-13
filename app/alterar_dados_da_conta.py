@@ -29,7 +29,7 @@ def Alterar_email(email, senha, novo_email):
             UPDATE usuarios
             SET email = ?
             WHERE id = ?
-        """, (novo_email, usuarios[0])) # Parte onde o email será alterado.
+        """, (novo_email, usuario[0])) # Parte onde o email será alterado.
 
         conexao.commit()
         return True, "email alterado com sucesso!"
