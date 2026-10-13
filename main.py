@@ -1,6 +1,6 @@
 from textual.app import App
 from app.cadastro_conta import Criar_Tabela
-from app.ui.interface import TelaMenu, TelaCursos
+from app.ui.interface import TelaMenu
 
 class MeuApp(App):
     def on_mount(self):

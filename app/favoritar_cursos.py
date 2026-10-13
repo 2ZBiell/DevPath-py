@@ -10,14 +10,15 @@ def Criar_Tabela_Favoritos():
     cursor = conexao.cursor()
 
     cursor.execute('''
-CREATE TABLE IF NOT EXISTS favoritos (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-nome_do_curso TEXT NOT NULL,
-plataforma TEXT NOT NULL,
-linguagem TEXT NOT NULL,
-gratuito BOOLEAN NOT NULL,
-)
-''')
+        CREATE TABLE IF NOT EXISTS favoritos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome_do_curso TEXT NOT NULL,
+        plataforma TEXT NOT NULL,
+        linguagem TEXT NOT NULL,
+        gratuito BOOLEAN NOT NULL,
+        )
+    ''')
+    
     conexao.commit()
 
 def Favoritar_cursos():

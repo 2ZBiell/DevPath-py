@@ -1,20 +1,27 @@
-from cadastro_conta import ConectarBanco
-def Deletar_Usuario():
-    conexao = ConectarBanco()
-    cursor = conexao.cursor()
-    id = int(input("\nDigite o ID do usuário que deseja deletar: "))
+from app.cadastro_conta import Conectar_Banco
 
-    cursor.execute("""
-    DELETE FROM nome_de_usuario
-    WHERE id = ?
-    """, (id,))
+def Deletar_Usuario(email, senha):
+    conexao = Conectar_Banco()
 
-    conexao.commit()
+    try:
+        cursor = conexao.cursor()
 
-    print("\nUsuários depois do DELETE:")
+        cursor.execute("""
+            SELECT id FROM usuarios
+            WHERE email = ? AND senha = ?
+        """, (email, senha))
 
-    cursor.execute("SELECT * FROM nome_de_usuario")
-    usuarios = cursor.fetchall()
+        usuario = cursor.fetchone()
 
-    for usuario in usuarios:
-        print(usuario)
+        if not usuario:
+            return False, "E-mail ou senha incorretos."
+
+        cursor.execute("""
+            DELETE FROM usuarios
+            WHERE id = ?
+        """, (usuario[0],))
+
+        conexao.commit()
+        return True, "Conta removida com sucesso!"
+    finally:
+        conexao.close()
