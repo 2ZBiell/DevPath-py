@@ -70,7 +70,7 @@ def Cadastrar_Conta(email, nome_de_usuario, senha):
     finally:
         conexao.close()    
 
-def ValidarLogin(nome_de_usuario, senha):
+def ValidarLogin(email, senha):
     conexao = Conectar_Banco()
 
     try:
@@ -79,8 +79,8 @@ def ValidarLogin(nome_de_usuario, senha):
         cursor.execute("""
         SELECT id
         FROM usuarios
-        WHERE nome_de_usuario = ? AND senha = ?
-        """, (nome_de_usuario, senha))
+        WHERE email= ? AND senha = ?
+        """, (email, senha))
 
         usuario = cursor.fetchone()
 
