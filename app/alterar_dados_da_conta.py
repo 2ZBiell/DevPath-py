@@ -1,9 +1,14 @@
 import sqlite3
 from app.cadastro_conta import Conectar_Banco
 
-"""Função para alterar email. 
-Usando o email antigo e a senha para indentificar a conta."""
+
 def Alterar_email(email, senha, novo_email):
+    """ Função para alterar email. 
+Usando o email antigo e senha, para o cursor procurar uma conta na tabela.
+Então ele irá selecionar a conta em forma de lista
+onde será selecionado somente o primeiro elemento da lista que é o id da conta,
+para ser utilizado como identificador na parte de atualizar o email.
+"""
     if '@' not in novo_email: # O email deve ter '@', ser diferente do antigo e o usuário deve ser encontrado.
         return False, "Digite um email válido."
     
@@ -41,9 +46,13 @@ def Alterar_email(email, senha, novo_email):
         conexao.close()
 
     
-"""Função para alterar o nome do Usuário. 
-Usando o nome antigo e a senha para indentificar a conta."""
 def Alterar_nome_de_usuario(nome_atual, senha, nome_novo):
+    """ Função para alterar o nome do Usuário. 
+Usando o nome de usuário e a senha, para o cursor procurar uma conta na tabela.
+Então ele irá selecionar a conta em forma de lista
+onde será selecionado somente o primeiro elemento da lista que é o id da conta,
+para ser utilizado como identificador na parte de atualizar o nome de usuário.
+"""
     if nome_novo == nome_atual:
         return False, "Nome atual é igual ao nome novo."
 
@@ -79,9 +88,14 @@ def Alterar_nome_de_usuario(nome_atual, senha, nome_novo):
     finally:
         conexao.close()
 
-"""Função para alterar a senha.
-Usando o email e senha antiga para indentificar a conta."""
+
 def Alterar_senha(email, senha, nova_senha):
+    """ Função para alterar a senha.
+Usando o email e senha antiga, para o cursor procurar uma conta na tabela. 
+Então ele irá selecionar a conta em forma de lista
+onde será selecionado somente o primeiro elemento da lista que é o id da conta,
+para ser utilizado como identificador na parte de atualizar a senha.
+"""
     if not 8 <= len(nova_senha) <= 20:  # Senha nova deve seguir o padrao.
         return False, "A senha deve ter entre 8 e 20 caracteres."
 
