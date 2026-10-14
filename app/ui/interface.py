@@ -4,8 +4,8 @@ from textual.widgets import Input, Button, Static, OptionList
 from textual.widgets.option_list import Option
 from app.buscar import BuscarCursos
 from app.cadastro_conta import Cadastrar_Conta, ValidarLogin
-from textual.containers import Vertical
-from app.alterar_dados_da_conta import Alterar_email, Alterar_nome_de_usuario, Alterar_senha
+from textual.containers import Vertical, Center
+from app.alterar_dados_da_contav2 import Solicitar_alteracao_email, Confirmar_codigo_email, Alterar_nome_de_usuario, Solicitar_alteracao_senha, Confirmar_codigo_senha
 from app.deletar_dados import Deletar_Usuario
 
 # widgets: Input, Select, Button, DataTable, etc
@@ -328,86 +328,50 @@ class TelaAtualizar(Screen):
         align: center middle;
     }
 
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-
-    #detalhes {
+    #caixa_menu {
         width: 70;
-        padding: 2;
         height: auto;
-        border: round cyan;
-    }
-
-    Input {
-        width: 100%;
-        margin-bottom: 1;
         align: center middle;
+        padding: 2;
+        border: round cyan;
     }
 
     Button {
         width: 100%;
         margin-bottom: 1;
-        align: center middle;
     }
 
-    #mensagem {
+    #titulo {
         width: 100%;
         text-align: center;
-        margin-top: 1;
+        text-style: bold;
+        margin-bottom: 2;
     }
     """
 
     def compose(self):
-        with Vertical(id="detalhes"):
-            yield Static("Alterar dados da conta", id="titulo")
-            yield Input(placeholder="E-mail atual", id="email")
-            yield Input(placeholder="Nome de usuário atual", id="nome_atual")
-            yield Input(
-                placeholder="Senha atual",
-                password=True,
-                id="senha"
-            )
-            yield Input(placeholder="Digite o novo valor...", id="novo_valor")
-            yield Button("Alterar e-mail", id="botao_email")
-            yield Button("Alterar nome de usuário", id="botao_nome")
-            yield Button("Alterar senha", id="botao_senha")
+        with Vertical(id="caixa_menu"):
+            yield Static("O QUE VOCÊ DESEJA ALTERAR?", id="titulo")
+            yield Button("Alterar E-mail", id="nav_email")
+            yield Button("Alterar Nome de Usuário", id="nav_nome")
+            yield Button("Alterar Senha", id="nav_senha")
             yield Button("← Voltar", id="voltar")
-            yield Static("", id="mensagem")
 
     def on_button_pressed(self, event):
         if event.button.id == "voltar":
             self.app.pop_screen()
-            return
+            
+        elif event.button.id == "nav_email":
+            # Abre a tela específica que vai coletar os dados do email
+            self.app.push_screen(TelaAlterarEmail())
+            
+        elif event.button.id == "nav_nome":
+            # Abre a tela específica pra o username
+            self.app.push_screen(TelaAlterarNome())
 
-        email = self.query_one("#email", Input).value.strip()
-        nome_atual = self.query_one("#nome_atual", Input).value.strip()
-        senha = self.query_one("#senha", Input).value
-        novo_valor = self.query_one("#novo_valor", Input).value.strip()
-
-        if event.button.id == "botao_email":
-            resultado = Alterar_email(
-                email, senha, novo_valor
-            )
-
-        elif event.button.id == "botao_nome":
-            resultado = Alterar_nome_de_usuario(
-                nome_atual, senha, novo_valor
-            )
-
-        elif event.button.id == "botao_senha":
-            resultado = Alterar_senha(
-                email, senha, novo_valor
-            )
-
-        else:
-            return
-
-        sucesso, mensagem = resultado
-
-        self.query_one("#mensagem", Static).update(mensagem)
+        elif event.button.id == "nav_senha":
+           # Abre a tela específica da senha
+           self.app.push_screen(TelaAlterarSenha())
 
 class TelaRemover(Screen):
     CSS = """
@@ -516,3 +480,334 @@ class TelaDetalhesCurso(Screen):
     def on_button_pressed(self, event):
         if event.button.id == "voltar":
             self.app.pop_screen()
+
+class TelaAlterarEmail(Screen):
+    CSS = """
+    TelaAlterarEmail {
+        align: center middle;
+    }
+
+    #titulo {
+        width: 100%;
+        text-align: center;
+    }
+
+    #caixa_alterar_email {
+        width: 70;
+        height: auto;
+        padding: 2;
+        border: round cyan;
+    }
+
+    Input, Button {
+        width: 100%;
+        margin-bottom: 1;
+    }
+
+    #titulo_email, #mensagem_email {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 1;
+    }
+    """
+
+    def compose(self):
+        with Vertical(id="caixa_alterar_email"):
+            yield Static("[bold]SOLICITAR ALTERAÇÃO DE E-MAIL[/bold]",id='titulo', markup=True)
+        
+            # Onde vao ser coletados os dados
+            yield Input(placeholder="E-mail atual", id="email_atual")
+            yield Input(placeholder="Senha", password=True, id="senha")
+            yield Input(placeholder="Novo E-mail desejado", id="novo_email")
+        
+            yield Button("Solicitar Código", id="btn_solicitar", variant="primary")
+            yield Button("← Cancelar", id="btn_cancelar")
+        
+            yield Static("", id="mensagem_email")
+
+    def on_button_pressed(self, event):
+        if event.button.id == "btn_cancelar":
+            self.app.pop_screen() # Volta para o menu anterior
+            return
+
+        if event.button.id == "btn_solicitar":
+            # Extrai os valores que o usuario digitou nos Inputs
+            email = self.query_one("#email_atual", Input).value.strip()
+            senha = self.query_one("#senha", Input).value
+            novo_email = self.query_one("#novo_email", Input).value.strip()
+
+            # Chama a função do backend 
+            sucesso, mensagem, user_id = Solicitar_alteracao_email(email, senha, novo_email)
+
+            if sucesso:
+                # Se os dados estiverem corretos e o e-mail for enviado, 
+                # abre a tela do código e envia o 'user_id'.
+                self.app.push_screen(TelaConfirmarEmail(user_id=user_id))
+            else:
+                # senha errada, e-mail inválido, mostra o erro no ecrã.
+                self.query_one("#mensagem_email", Static).update(f"[red]{mensagem}[/red]")
+
+class TelaConfirmarEmail(Screen):
+    CSS = """
+    TelaConfirmarEmail {
+        align: center middle;
+    }
+
+    #titulo {
+        width: 100%;
+        text-align: center;
+        margin: 1 0;
+    }
+    
+    #caixa_central {
+        width: 70;
+        height: auto;
+        padding: 2;
+        border: round cyan;
+    }
+
+    Input, Button {
+        width: 100%;
+        margin-bottom: 1;
+    }
+
+#titulo_codigo, #descricao_codigo, #mensagem_codigo {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 1;
+    }
+    """
+
+    # O __init__ é obrigatório nesta tela para receber o ID do usuário
+    def __init__(self, user_id):
+        super().__init__()
+        self.user_id = user_id
+
+    def compose(self):
+        with Vertical(id="caixa_central"):
+            yield Static("[bold]CÓDIGO DE VERIFICAÇÃO[/bold]", id='titulo',markup=True)
+            yield Static("Enviamos um código de 6 dígitos para o seu novo e-mail.\nVerifique também a caixa de spam.")
+            yield Input(placeholder="Digite o código (Ex: 123456)", id="codigo")
+        
+            yield Button("Confirmar Alteração", id="btn_confirmar", variant="primary")
+            yield Button("← Cancelar", id="btn_cancelar", variant="error")
+        
+            yield Static("", id="mensagem_codigo")
+
+    def on_button_pressed(self, event):
+        if event.button.id == "btn_cancelar":
+            self.app.pop_screen() # Cancela e volta para a tela de preencher os dados
+            return
+
+        if event.button.id == "btn_confirmar":
+            codigo = self.query_one("#codigo", Input).value.strip()
+            
+            # Chama a função do banco de dados (Etapa 2) passando o ID e o código
+            sucesso, mensagem = Confirmar_codigo_email(self.user_id, codigo)
+
+            if sucesso:
+                # Se a alteração for feita com sucesso, fechamos as telas de e-mail
+                self.app.pop_screen() # Fecha a tela atual (ConfirmarEmail)
+                self.app.pop_screen() # Fecha a tela de trás (AlterarEmail)
+                
+                # Mostra uma mensagem de sucesso na TelaAtualizar (o menu)
+                try:
+                    self.app.screen.query_one("#titulo", Static).update(f"[green]E-mail alterado com sucesso![/green]")
+                except:
+                    pass # Evita erro caso o ID #titulo não seja encontrado na tela de baixo
+            else:
+                # Se o código estiver errado, mostra o erro em vermelho
+                self.query_one("#mensagem_codigo", Static).update(f"[red]{mensagem}[/red]")
+
+class TelaAlterarSenha(Screen):
+    CSS = """
+    TelaAlterarSenha {
+        align: center middle;
+    }
+
+    #titulo {
+        width: 100%;
+        text-align: center;
+        margin: 1 0;
+    }
+        
+    #caixa_central {
+        width: 70;
+        height: auto;
+        padding: 2;
+        border: round cyan;
+    }
+
+    Input, Button {
+        width: 100%;
+        margin-bottom: 1;
+    }
+
+    #titulo_senha, #mensagem_senha {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 1;
+    }
+    """
+
+    def compose(self):
+        with Vertical(id="caixa_central"):
+            yield Static("[bold]SOLICITAR ALTERAÇÃO DE SENHA[/bold]", id="titulo_senha", markup=True)
+            yield Input(placeholder="E-mail atual", id="email_atual")
+            yield Input(placeholder="Senha atual", password=True, id="senha_atual")
+            yield Input(placeholder="Nova Senha desejada", password=True, id="nova_senha")
+            yield Button("Solicitar Código", id="btn_solicitar", variant="primary")
+            yield Button("← Cancelar", id="btn_cancelar")
+            yield Static("", id="mensagem_senha")
+
+    def on_button_pressed(self, event):
+        if event.button.id == "btn_cancelar":
+            self.app.pop_screen()
+            return
+
+        if event.button.id == "btn_solicitar":
+            email = self.query_one("#email_atual", Input).value.strip()
+            senha = self.query_one("#senha_atual", Input).value
+            nova_senha = self.query_one("#nova_senha", Input).value
+
+            # Chama a função que criámos acima
+            sucesso, mensagem, user_id = Solicitar_alteracao_senha(email, senha, nova_senha)
+
+            if sucesso:
+                self.app.push_screen(TelaConfirmarSenha(user_id=user_id))
+            else:
+                self.query_one("#mensagem_senha", Static).update(f"[red]{mensagem}[/red]")
+
+class TelaConfirmarSenha(Screen):
+
+
+    CSS = """
+    TelaConfirmarSenha {
+        align: center middle;
+    }
+
+    #titulo {
+        width: 100%;
+        text-align: center;
+        margin: 1 0;
+    }
+            
+    #caixa_central {
+        width: 70;
+        height: auto;
+        padding: 2;
+        border: round cyan;
+    }
+
+    Input, Button {
+        width: 100%;
+        margin-bottom: 1;
+    }
+
+    #descricao_codigo_senha, #mensagem_codigo_senha {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 1;
+    }
+    """
+
+    def __init__(self, user_id):
+        super().__init__()
+        self.user_id = user_id
+
+    def compose(self):
+        with Vertical(id="caixa_central"):
+            yield Static("[bold]CÓDIGO DE VERIFICAÇÃO[/bold]", id="titulo_codigo_senha", markup=True)
+            yield Static("Enviámos um código de 6 dígitos para o seu e-mail.\nVerifique também a caixa de spam.", id="descricao_codigo_senha")
+            yield Input(placeholder="Digite o código (Ex: 123456)", id="codigo")
+            yield Button("Confirmar Alteração", id="btn_confirmar", variant="primary")
+            yield Button("← Cancelar", id="btn_cancelar", variant="error")
+            yield Static("", id="mensagem_codigo_senha")
+
+    def on_button_pressed(self, event):
+        if event.button.id == "btn_cancelar":
+            self.app.pop_screen()
+            return
+
+        if event.button.id == "btn_confirmar":
+            codigo = self.query_one("#codigo", Input).value.strip()
+            
+            sucesso, mensagem = Confirmar_codigo_senha(self.user_id, codigo)
+
+            if sucesso:
+                self.app.pop_screen()
+                self.app.pop_screen()
+                
+                try:
+                    self.app.screen.query_one("#titulo", Static).update(f"[green]Senha alterada com sucesso![/green]")
+                except:
+                    pass
+            else:
+                self.query_one("#mensagem_codigo_senha", Static).update(f"[red]{mensagem}[/red]")
+
+class TelaAlterarNome(Screen):
+    CSS = """
+    TelaAlterarNome {
+        align: center middle;
+    }
+
+    #titulo {
+        width: 100%;
+        text-align: center;
+        margin: 1 0;
+    }
+                
+    #caixa_central {
+        width: 70;
+        height: auto;
+        padding: 2;
+        border: round cyan;
+    }
+
+    Input, Button {
+        width: 100%;
+        margin-bottom: 1;
+    }
+
+    #titulo_nome, #mensagem_nome {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 1;
+    }
+    """
+
+    def compose(self):
+        with Vertical(id="caixa_central"):
+            yield Static("[bold]ALTERAR NOME DE USUÁRIO[/bold]", id="titulo_nome", markup=True)
+            yield Input(placeholder="Nome de usuário atual", id="nome_atual")
+            yield Input(placeholder="Senha", password=True, id="senha")
+            yield Input(placeholder="Novo Nome de usuário", id="nome_novo")
+            yield Button("Confirmar Alteração", id="btn_confirmar", variant="primary")
+            yield Button("← Cancelar", id="btn_cancelar")
+            yield Static("", id="mensagem_nome")
+
+    def on_button_pressed(self, event):
+        if event.button.id == "btn_cancelar":
+            self.app.pop_screen()
+            return
+
+        if event.button.id == "btn_confirmar":
+            nome_atual = self.query_one("#nome_atual", Input).value.strip()
+            senha = self.query_one("#senha", Input).value
+            nome_novo = self.query_one("#nome_novo", Input).value.strip()
+
+        
+            sucesso, mensagem = Alterar_nome_de_usuario(nome_atual, senha, nome_novo)
+
+            if sucesso:
+                self.app.pop_screen() # Fecha a tela e volta pro menu
+                
+                # Exibe a mensagem de sucesso.
+                try:
+                    self.app.screen.query_one("#titulo", Static).update(f"[green]{mensagem}[/green]")
+                except:
+                    pass
+            else:
+                # Exibe o erro (ex: senha incorreta ou nome já existe)
+                self.query_one("#mensagem_nome", Static).update(f"[red]{mensagem}[/red]")
+                
