@@ -1,5 +1,5 @@
 import sqlite3
-from colorama import Style, Fore, init
+
 # funcionalidades para cadastro de conta 
 
 def Conectar_Banco():
