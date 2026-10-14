@@ -1,162 +1,130 @@
 import sqlite3
-from colorama import Fore, Back, Style, init
-def Conectar_Banco():
-    return sqlite3.connect("data/usuarios.db")
+from app.cadastro_conta import Conectar_Banco
 
 
-
-def Alterar_email():
-    """Função para alterar email. 
+def Alterar_email(email, senha, novo_email):
+    """ Função para alterar email. 
 Usando o email antigo e senha, para o cursor procurar uma conta na tabela.
 Então ele irá selecionar a conta em forma de lista
 onde será selecionado somente o primeiro elemento da lista que é o id da conta,
 para ser utilizado como identificador na parte de atualizar o email.
 """
+    if '@' not in novo_email: # O email deve ter '@', ser diferente do antigo e o usuário deve ser encontrado.
+        return False, "Digite um email válido."
+    
+    if novo_email == email:  # O email também deve ser diferente do antigo e o usuário deve ser encontrado.
+        return False, "O email novo é igual ao atual."
+
     conexao = Conectar_Banco()
-    cursor = conexao.cursor()
 
-    print(Fore.GREEN + '\n--ALTERANDO EMAIL--\n' + Style.RESET_ALL)
-    email = input(Fore.CYAN + 'Digite seu email atual: ' + Style.RESET_ALL).strip()
-    senha = input(Fore.CYAN + 'Digite sua senha: ' + Style.RESET_ALL).strip()
-    novo_email = input(Fore.CYAN + 'Digite o novo email para troca: ' + Style.RESET_ALL).strip()
+    try:
+        cursor = conexao.cursor()
+    
+        cursor.execute("""
+            SELECT id FROM usuarios
+            WHERE email = ? AND senha = ?
+        """, (email, senha))  # Parte de indenticar qual a conta o usuário quer alterar.
 
-    cursor.execute('''
-SELECT id FROM usuarios
-WHERE email = ?
-AND senha = ?
-''', (email, senha) # Parte de indenticar qual a conta o usuário quer alterar.
-)
-    usuario = cursor.fetchone() # Caso as Credenciais estejam corretas ele ira encontrar um id e selecionar ele pra váriavel.
+        usuario = cursor.fetchone()  # Caso as Credenciais estejam corretas ele ira encontrar um id e selecionar ele pra váriavel.
 
-    if '@' in novo_email and novo_email != email and usuario: # O email deve ter '@', ser diferente do antigo e o usuário deve ser encontrado.
-        id = usuario[0]
-        cursor.execute('''
-UPDATE usuarios
-SET email = ?
-WHERE id = ?
-''', (novo_email, id)) # Parte onde o email será alterado de acordo com o id do usuário.
+        if not usuario:
+            return False, "email atual ou senha incorretos."
+
+        cursor.execute("""
+            UPDATE usuarios
+            SET email = ?
+            WHERE id = ?
+        """, (novo_email, usuario[0])) # Parte onde o email será alterado.
+
         conexao.commit()
+        return True, "email alterado com sucesso!"
 
-        print(Fore.GREEN + '\n--EMAIL ALTERADO!--\n' + Style.RESET_ALL)
-        print(Fore.GREEN + 'Digite - 1 para realizar outra operação.')
-        print('Digite qualquer coisa para parar o programa.' + Style.RESET_ALL)
-        voltar = input(Fore.CYAN + '\nOpção: ' + Style.RESET_ALL).strip()
-        if voltar == '1':
-            return True
-        else:
-            return False
-    
-    elif novo_email == email and not usuario:
-        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS, TENTE NOVAMENTE!--' + Style.RESET_ALL) # Caso o email seja igual ao antigo e as credenciais estejam erradas.
-        return True
-    
-    elif novo_email == email:
-        print(Fore.RED + '\n--EMAIL NOVO IGUAL AO ATUAL!--' + Style.RESET_ALL) # Caso o email seja igual ao antigo e as credenciais estejam corretas.
-        return True
+    except sqlite3.IntegrityError:
+        return False, "Esse email já está cadastrado."
+
+    finally:
+        conexao.close()
 
     
-
-def Alterar_nome_de_usuario():
-    """Função para alterar o nome do Usuário. 
+def Alterar_nome_de_usuario(nome_atual, senha, nome_novo):
+    """ Função para alterar o nome do Usuário. 
 Usando o nome de usuário e a senha, para o cursor procurar uma conta na tabela.
 Então ele irá selecionar a conta em forma de lista
 onde será selecionado somente o primeiro elemento da lista que é o id da conta,
 para ser utilizado como identificador na parte de atualizar o nome de usuário.
 """
+    if nome_novo == nome_atual:
+        return False, "Nome atual é igual ao nome novo."
+
     conexao = Conectar_Banco()
-    cursor = conexao.cursor()
 
-    print(Fore.GREEN + '\n--ALTERANDO NOME DE USUÁRIO--\n' + Style.RESET_ALL)
-    nome_de_usuario = input(Fore.CYAN + 'Digite seu nome de usuário atual: ' + Style.RESET_ALL).strip()
-    senha = input(Fore.CYAN + 'Digite sua senha: ' + Style.RESET_ALL).strip()
-    novo_username = input(Fore.CYAN + 'Digite o novo nome de usuário para troca: ' + Style.RESET_ALL).strip()
+    try:
+        cursor = conexao.cursor()
 
-    cursor.execute('''
-SELECT id FROM usuarios
-WHERE nome_de_usuario = ?
-AND senha = ?
-''', (nome_de_usuario, senha)) # Parte de indenticar qual a conta o usuário quer alterar.
 
-    usuario = cursor.fetchone() # Caso as Credenciais estejam corretas ele ira encontrar um id e selecionar ele pra váriavel.
-
-    if nome_de_usuario != novo_username and usuario: # Nome de usuário deve ser diferente e o usuário deve ser encontrado.
-        id = usuario[0]
         cursor.execute('''
-UPDATE usuarios
-SET nome_de_usuario = ?
-WHERE id = ? 
-''', (novo_username, id)) # Parte onde o nome de usuário será alterado de acordo com o id do usuário.
+            SELECT id FROM usuarios
+            WHERE nome_de_usuario = ?
+            AND senha = ?
+        ''', (nome_atual, senha)) # Parte de indenticar qual a conta o usuário quer alterar.
+
+        usuario = cursor.fetchone() # Caso as Credenciais estejam corretas ele ira encontrar um id e selecionar ele pra váriavel.
+
+        if not usuario: 
+            return False, "Nome de usuário ou senha incorretos."
+        
+        cursor.execute('''
+            UPDATE usuarios
+            SET nome_de_usuario = ?
+            WHERE id = ? 
+        ''', (nome_novo, usuario[0])) # Parte onde o nome de usuário será alterado.
+        
         conexao.commit()
+        return True, "Nome de usuário alterado com sucesso!"
 
-        print(Fore.GREEN + '\n--USUÁRIO ALTERADO!--\n' + Style.RESET_ALL) 
-        print(Fore.GREEN + 'Digite - 1 para realizar outra operação.')
-        print('Digite qualquer coisa para parar o programa.' + Style.RESET_ALL)
-        voltar = input(Fore.CYAN + '\nOpção: ' + Style.RESET_ALL).strip()
-        if voltar == '1':
-            return True
-        else:
-            return False
-    
-    elif novo_username == nome_de_usuario and not usuario:
-        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS, TENTE NOVAMENTE!--' + Style.RESET_ALL) # Caso o nome de usuário seja igual ao antigo e as credencieis estejam incorretas. 
-        return True
-    
-    elif novo_username == nome_de_usuario:
-        print(Fore.RED + '\n--NOME DE USUÁRIO NOVO IGUAL AO ANTIGO!--' + Style.RESET_ALL) # Caso o nome de usuário seja igual ao antigo e as credenciais estejam corretas.
-        return True
+    except sqlite3.IntegrityError:
+        return False, "Esse nome de usuário já está cadastrado."
+
+    finally:
+        conexao.close()
 
 
-
-def Alterar_senha():
-    """Função para alterar a senha.
+def Alterar_senha(email, senha, nova_senha):
+    """ Função para alterar a senha.
 Usando o email e senha antiga, para o cursor procurar uma conta na tabela. 
 Então ele irá selecionar a conta em forma de lista
 onde será selecionado somente o primeiro elemento da lista que é o id da conta,
 para ser utilizado como identificador na parte de atualizar a senha.
 """
+    if not 8 <= len(nova_senha) <= 20:  # Senha nova deve seguir o padrao.
+        return False, "A senha deve ter entre 8 e 20 caracteres."
+
+    if nova_senha == senha:  # Senha nova deve ser diferente da antiga.
+        return False, "A nova senha é igual à atual."
 
     conexao = Conectar_Banco()
-    cursor = conexao.cursor()
 
-    print(Fore.GREEN + '\n--ALTERANDO SENHA--\n' + Style.RESET_ALL)
-    email = input(Fore.CYAN + 'Digite seu email atual: ' + Style.RESET_ALL).strip()
-    senha = input(Fore.CYAN + 'Digite sua senha: ' + Style.RESET_ALL).strip()
-    nova_senha = input(Fore.CYAN + 'Digite sua nova senha para troca(MIN-8 MAX-20): ' + Style.RESET_ALL).strip()  
+    try:
+        cursor = conexao.cursor()
 
-    cursor.execute('''
-SELECT id FROM usuarios
-WHERE email = ?
-AND senha = ?
-''', (email, senha)) # Parte de indenticar qual a conta o usuário quer alterar.
-
-    usuario = cursor.fetchone() # Caso as Credenciais estejam corretas ele ira encontrar um id e selecionar ele pra váriavel.
-
-    if 8 <= len(nova_senha) <= 20 and nova_senha != senha and usuario: # Senha nova deve seguir o padrao e ser diferente da antiga e o usuário deve ser encontrado.
-        id = usuario[0]
         cursor.execute('''
-UPDATE usuarios
-SET senha = ?
-WHERE id = ?
-''',(nova_senha, id)) # Parte onde a senha será alterada de acordo com o id do usuário.
+            SELECT id FROM usuarios
+            WHERE email = ?
+            AND senha = ?
+        ''', (email, senha)) # Parte de indenticar qual a conta o usuário quer alterar.
+
+        usuario = cursor.fetchone() # Caso as Credenciais estejam corretas ele ira encontrar um id e selecionar ele pra váriavel.
+
+        if not usuario:
+            return False, "email ou senha atual incorretos."
+
+        cursor.execute('''
+            UPDATE usuarios
+            SET senha = ?
+            WHERE id = ?
+        ''',(nova_senha, usuario[0])) # Parte onde a senha será alterada.
+       
         conexao.commit()
-
-        print(Fore.GREEN + '\n--SENHA ALTERADA COM SUCESSO!--\n' + Style.RESET_ALL)
-        print(Fore.GREEN + 'Digite - 1 para realizar outra operação.')
-        print('Digite qualquer coisa para parar o programa.' + Style.RESET_ALL)
-        voltar = input(Fore.CYAN + '\nOpção: ' + Style.RESET_ALL).strip()
-        if voltar == '1':
-            return True
-        else:
-            return False
-
-    elif 8 < len(nova_senha) > 20 and usuario:
-        print(Fore.RED + '\n--SENHA FORA DO PADRÃO!--' + Style.RESET_ALL)
-        return True
-    
-    elif not usuario:
-        print(Fore.RED + '\n--CREDENCIAIS INVÁLIDAS, TENTE NOVAMENTE!--' + Style.RESET_ALL) # Caso as senhas sejam iguais mas o usuário não foi encontrado. 
-        return True   
-    
-    elif nova_senha == senha and usuario: 
-        print(Fore.RED + '\n--SENHAS IGUAIS, NADA SERÁ ALTERADO!--' + Style.RESET_ALL) # Caso as senhas sejam iguais e o usuário foi encontrado.
-        return True
+        return True, "Senha alterada com sucesso!"
+    finally:
+        conexao.close()

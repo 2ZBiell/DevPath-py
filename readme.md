@@ -50,7 +50,8 @@ Entre as principais funcionalidades planejadas para o DevPath estão:
 
 ## 🛠️ Tecnologias
 
-O projeto está sendo desenvolvido utilizando **Python** e conta com um banco de dados **SQLite** para armazenamento das informações.
+O projeto está sendo desenvolvido em **Python** utilizando o **Textual** para interface do terminal e conta
+com um banco de dados **SQLite** para armazenamento das informações.
 
 Outras tecnologias e bibliotecas serão adicionadas conforme o desenvolvimento das funcionalidades do projeto.
 
@@ -83,7 +84,7 @@ A estrutura poderá ser modificada conforme novas funcionalidades forem implemen
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/2ZBiell/DevPath.git
+git clone https://github.com/2ZBiell/DevPath-py.git
 ```
 
 ### 2. Acessar a pasta do projeto
