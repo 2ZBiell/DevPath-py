@@ -8,6 +8,7 @@ from textual.containers import Vertical
 from app.alterar_dados_da_contav2 import Solicitar_alteracao_email, Confirmar_codigo_email, Confirmar_codigo_senha, Solicitar_alteracao_senha, Alterar_nome_de_usuario
 from app.deletar_dados import Deletar_Usuario
 
+# Interface textual para o aplicativo DevPath
 # widgets: Input, Select, Button, DataTable, etc
 # queryone
 # compose()

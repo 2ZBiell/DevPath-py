@@ -18,7 +18,11 @@ def Enviar_email_smtp(destinatario, token):
     msg['Subject'] = 'Alteração de E-mail no DevPath'
     msg['From'] = EMAIL_REMETENTE
     msg['To'] = destinatario
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
     # Mensagem do email
     msg.set_content(f"""
     Olá,
@@ -34,7 +38,11 @@ def Enviar_email_smtp(destinatario, token):
             smtp.login(EMAIL_REMETENTE, SENHA_APP_EMAIL)
             smtp.send_message(msg)
         return True
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
     except Exception as erro:
         print(f"Erro ao enviar o e-mail via SMTP: {erro}")
         return False
@@ -50,15 +58,26 @@ def Solicitar_alteracao_email(email_atual, senha, novo_email):
     padrao = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     if not re.match(padrao, novo_email):
         return False, "Digite um formato de e-mail válido.", None
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
     if novo_email == email_atual:
         return False, "O e-mail novo não pode ser igual ao atual.", None
 
     conexao = Conectar_Banco()
+<<<<<<< Updated upstream
     
     try:
         cursor = conexao.cursor()
         
+=======
+
+    try:
+        cursor = conexao.cursor()
+
+>>>>>>> Stashed changes
         # Verifica se o usuário e a senha existem no banco
         cursor.execute("SELECT id FROM usuarios WHERE email = ? AND senha = ?", (email_atual, senha))
         usuario = cursor.fetchone()
@@ -67,12 +86,20 @@ def Solicitar_alteracao_email(email_atual, senha, novo_email):
             return False, "E-mail atual ou senha incorretos.", None
 
         usuario_id = usuario[0]
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         # Gera um token numérico seguro de 6 dígitos
         token = str(secrets.randbelow(900000) + 100000) 
 
         # Guarda o token e a intenção de troca temporariamente no banco
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
         cursor.execute("""
             UPDATE usuarios 
             SET novo_email_pendente = ?, token_verificacao = ? 
@@ -102,16 +129,27 @@ def Confirmar_codigo_email(usuario_id, token_digitado):
         return False, "Erro de identificação do usuário."
 
     conexao = Conectar_Banco()
+<<<<<<< Updated upstream
     
     try:
         cursor = conexao.cursor()
         
+=======
+
+    try:
+        cursor = conexao.cursor()
+
+>>>>>>> Stashed changes
         # Busca o token e o e-mail pendente no banco
         cursor.execute("""
             SELECT novo_email_pendente, token_verificacao 
             FROM usuarios WHERE id = ?
         """, (usuario_id,))
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         resultado = cursor.fetchone()
 
         if not resultado or not resultado[1]:
@@ -121,7 +159,11 @@ def Confirmar_codigo_email(usuario_id, token_digitado):
 
         # Compara o token digitado pelo usuário com o salvo no banco
         if str(token_digitado).strip() == str(token_salvo):
+<<<<<<< Updated upstream
             
+=======
+
+>>>>>>> Stashed changes
             # Se estiver correto, atualiza o email antigo e limpa os campos temporários
             cursor.execute("""
                 UPDATE usuarios 
@@ -129,7 +171,11 @@ def Confirmar_codigo_email(usuario_id, token_digitado):
                 WHERE id = ?
             """, (novo_email_pendente, usuario_id))
             conexao.commit()
+<<<<<<< Updated upstream
             
+=======
+
+>>>>>>> Stashed changes
             return True, "E-mail alterado com sucesso!"
         else:
             return False, "Código de verificação incorreto."
@@ -151,7 +197,11 @@ def Enviar_email_smtp_senha(destinatario, token):
     msg['Subject'] = 'Alteração de Senha no DevPath'
     msg['From'] = EMAIL_REMETENTE
     msg['To'] = destinatario
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
     msg.set_content(f"""
     Olá,
     Se você solicitou a alteração de SENHA da sua conta,
@@ -178,7 +228,11 @@ def Solicitar_alteracao_senha(email_atual, senha_atual, nova_senha):
     """
     if senha_atual == nova_senha:
         return False, "A nova senha não pode ser igual à atual.", None
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
     if len(nova_senha) < 6:
         return False, "A nova senha deve ter pelo menos 6 caracteres.", None
 
@@ -278,13 +332,21 @@ para ser utilizado como identificador na parte de atualizar o nome de usuário.
 
         if not usuario: 
             return False, "Nome de usuário ou senha incorretos."
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         cursor.execute('''
             UPDATE usuarios
             SET nome_de_usuario = ?
             WHERE id = ? 
         ''', (nome_novo, usuario[0])) # Parte onde o nome de usuário será alterado.
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
         conexao.commit()
         return True, "Nome de usuário alterado com sucesso!"
 
@@ -292,4 +354,9 @@ para ser utilizado como identificador na parte de atualizar o nome de usuário.
         return False, "Esse nome de usuário já está cadastrado."
 
     finally:
+<<<<<<< Updated upstream
         conexao.close()
+=======
+        conexao.close()
+        
+>>>>>>> Stashed changes
