@@ -7,3 +7,4 @@ venv/
 .env
 
 *.db
+!data/cursos.db
