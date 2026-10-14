@@ -24,30 +24,38 @@ class TelaCursos(Screen):
         align: center middle;
     }
 
+    #titulo {
+        width: 100%;
+        text-align: center;
+        margin: 1 0;
+    }
+
+    #detalhes {
+        width: 70;
+        height: auto;
+        padding: 2;
+        border: round cyan;
+    }
+
     Input {
-        width: 60;
+        width: 100%;
         margin: 1 0;
     }
 
     Button {
-        width: 60;
-        margin: 1 0;
-    }
-
-    Static {
-        width: 60;
-        text-align: center;
+        width: 100%;
         margin: 1 0;
     }
     """
 
     def compose(self):
-        yield Static("BUSCAR CURSOS")
-        yield Input(placeholder="Digite o nome do curso. . .", id="nome")
-        yield Button("Buscar", id="busca")
-        yield Static("", id="mensagem")
-        yield OptionList(id="resultados")
-        yield Button("← Voltar", id="voltar")
+        with Vertical(id="detalhes"):
+            yield Static("BUSCAR CURSOS", id="titulo")
+            yield Input(placeholder="Digite o nome do curso. . .", id="nome")
+            yield Button("Buscar", id="busca")
+            yield Static("", id="mensagem")
+            yield OptionList(id="resultados")
+            yield Button("← Voltar", id="voltar")
 
     def on_button_pressed(self, event):
         if event.button.id == "voltar":
