@@ -58,6 +58,7 @@ Outras tecnologias e bibliotecas serão adicionadas conforme o desenvolvimento d
 ---
 ## 📁 Estrutura do Projeto
 
+```text
 DevPath_project/
 ├── main.py
 ├── cadastrar_cursos.py
@@ -69,7 +70,7 @@ DevPath_project/
     ├── deletar_dados.py
     └── ui/
         └── interface.py
-
+```
 ---
 
 ## ▶️ Como Executar
