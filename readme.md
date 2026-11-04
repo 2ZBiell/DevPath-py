@@ -56,26 +56,22 @@ com um banco de dados **SQLite** para armazenamento das informações.
 Outras tecnologias e bibliotecas serão adicionadas conforme o desenvolvimento das funcionalidades do projeto.
 
 ---
-
 ## 📁 Estrutura do Projeto
 
-A estrutura do projeto é organizada de forma a separar as diferentes partes da aplicação:
-
-```text
-DevPath/
+DevPath_project/
+│
 ├── main.py
-├── README.md
-├── requirements.txt
-├── .gitignore
+├── cadastrar_cursos.py
 │
-├── app/
-│   └── database.py
-│
-└── data/
-    └── cursos.db
-```
-
-A estrutura poderá ser modificada conforme novas funcionalidades forem implementadas.
+└── app/
+    ├── database.py
+    ├── buscar.py
+    ├── cadastro_conta.py
+    ├── alterar_dados_da_contav2.py
+    ├── deletar_dados.py
+    │
+    └── ui/
+        └── interface.py
 
 ---
 
