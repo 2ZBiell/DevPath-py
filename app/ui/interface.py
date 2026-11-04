@@ -571,7 +571,7 @@ class TelaConfirmarEmail(Screen):
         margin-bottom: 1;
     }
 
-#titulo_codigo, #descricao_codigo, #mensagem_codigo {
+    #titulo_codigo, #descricao_codigo, #mensagem_codigo {
         width: 100%;
         text-align: center;
         margin-bottom: 1;
