@@ -2,12 +2,15 @@ import sqlite3
 import re
 import secrets
 import smtplib
+import os
+from dotenv import load_dotenv
 from email.message import EmailMessage
-from app.cadastro_conta import Conectar_Banco
+from app.cadastro_conta import 
 
-EMAIL_REMETENTE = "rsla9931@gmail.com"
+load_dotenv()
 
-SENHA_APP_EMAIL = "keitusjrodpxcavo" 
+EMAIL_REMETENTE = os.getenv("DEVPATH_EMAIL")
+SENHA_APP_EMAIL = os.getenv("DEVPATH_EMAIL_APP_PASSWORD")
 
 def Enviar_email_smtp(destinatario, token):
     """
