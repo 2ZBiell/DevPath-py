@@ -59,17 +59,14 @@ Outras tecnologias e bibliotecas serão adicionadas conforme o desenvolvimento d
 ## 📁 Estrutura do Projeto
 
 DevPath_project/
-│
 ├── main.py
 ├── cadastrar_cursos.py
-│
 └── app/
     ├── database.py
     ├── buscar.py
     ├── cadastro_conta.py
     ├── alterar_dados_da_contav2.py
     ├── deletar_dados.py
-    │
     └── ui/
         └── interface.py
 
