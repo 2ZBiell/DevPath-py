@@ -2,11 +2,12 @@ from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Input, Button, Static, OptionList
 from textual.widgets.option_list import Option
-from app.buscar import BuscarCursos
 from app.cadastro_conta import Cadastrar_Conta, ValidarLogin
 from textual.containers import Vertical, Center
 from app.alterar_dados_da_contav2 import Solicitar_alteracao_email, Confirmar_codigo_email, Alterar_nome_de_usuario, Solicitar_alteracao_senha, Confirmar_codigo_senha
 from app.deletar_dados import Deletar_Usuario
+from app.buscar import busca_cursos
+
 
 # widgets: Input, Select, Button, DataTable, etc
 # queryone
@@ -65,7 +66,7 @@ class TelaCursos(Screen):
         if event.button.id == "busca":
             nome = self.query_one("#nome", Input).value.strip()
 
-            resultados = BuscarCursos(nome_do_curso=nome)
+            resultados = busca_cursos.buscar(nome_do_curso=nome)
 
             lista = self.query_one("#resultados", OptionList)
             mensagem = self.query_one("#mensagem", Static)
