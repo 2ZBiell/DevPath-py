@@ -17,33 +17,63 @@ from app.deletar_dados import Deletar_Usuario
 # menu - cadastro/ login/ alterar dados/ remover usuario
 # obs: quando o cadastro for feito libera o acesso a buscar cursos
 
+CSS_COMUM = """
+Screen {
+    align: center middle;
+}
+
+/* Caixas principais */
+#detalhes,
+#caixa_menu,
+#caixa_alterar_email,
+#caixa_central {
+    width: 70;
+    height: auto;
+    padding: 2;
+    border: round cyan;
+}
+
+/* Campos e botões */
+Input,
+Button {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+/* Títulos */
+#titulo,
+#titulo_email,
+#titulo_codigo,
+#titulo_senha,
+#titulo_nome,
+#titulo_codigo_senha {
+    width: 100%;
+    text-align: center;
+    margin: 1 0;
+}
+
+/* Mensagens */
+#mensagem,
+#mensagem_email,
+#mensagem_codigo,
+#mensagem_senha,
+#mensagem_nome,
+#mensagem_codigo_senha {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 1;
+}
+"""
+
 class TelaCursos(Screen):
 
-    CSS = """
-    TelaCursos {
-        align: center middle;
-    }
-
+    CSS = CSS_COMUM + """
     #titulo {
-        width: 100%;
-        text-align: center;
         margin: 1 0;
     }
 
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input {
-        width: 100%;
-        margin: 1 0;
-    }
-
+    Input,
     Button {
-        width: 100%;
         margin: 1 0;
     }
     """
@@ -104,11 +134,7 @@ class TelaCursos(Screen):
 
 class TelaMenu(Screen):
 
-    CSS = """
-    TelaMenu {
-        align: center middle;
-    }
-
+    CSS = CSS_COMUM + """
     #botoes {
         width: 40;
         height: auto;
@@ -123,7 +149,6 @@ class TelaMenu(Screen):
         content-align: center middle;
         text-style: bold;
         margin-bottom: 1;
-
     }
 
     #botoes > Button {
@@ -131,6 +156,7 @@ class TelaMenu(Screen):
         margin: 1 0;
     }
     """
+
 
     def compose(self):
         with Vertical(id="botoes"):
@@ -164,35 +190,6 @@ class TelaMenu(Screen):
             return
 
 class TelaCadastro(Screen):
-
-    CSS = """
-    TelaCadastro {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input {
-        width: 100%;
-        margin: 1 0;
-    }
-
-    Button {
-        width: 100%;
-        margin: 1 0;
-    }
-    """
 
     def compose(self):
         with Vertical(id="detalhes"):
@@ -229,44 +226,6 @@ class TelaCadastro(Screen):
 
 class TelaLogin(Screen):
 
-    CSS = """
-    TelaLogin {
-        align: center middle;
-    }
-
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        text-style: bold;
-        margin-bottom: 2;
-    }
-
-    Input {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    Button {
-        width: 100%;
-        margin-bottom: 1;
-        align: center middle;
-    }
-
-    #mensagem {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
-
     def compose(self):
         with Vertical(id="detalhes"):
             yield Static("Login", id="titulo")
@@ -294,11 +253,7 @@ class TelaLogin(Screen):
 
 class TelaSucesso(Screen):
 
-    CSS = """
-    TelaSucesso {
-        align: center middle;
-    }
-
+    CSS = CSS_COMUM + """
     #resultado {
         width: 40;
         height: auto;
@@ -306,7 +261,7 @@ class TelaSucesso(Screen):
         margin: 0;
     }
 
-    Button {
+    #resultado > Button {
         width: 40;
         margin: 1 0;
     }
@@ -323,27 +278,13 @@ class TelaSucesso(Screen):
             self.app.switch_screen(TelaCursos())    
 
 class TelaAtualizar(Screen):
-    CSS = """
-    TelaAtualizar {
-        align: center middle;
-    }
 
+    CSS = CSS_COMUM + """
     #caixa_menu {
-        width: 70;
-        height: auto;
         align: center middle;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Button {
-        width: 100%;
-        margin-bottom: 1;
     }
 
     #titulo {
-        width: 100%;
-        text-align: center;
         text-style: bold;
         margin-bottom: 2;
     }
@@ -374,38 +315,6 @@ class TelaAtualizar(Screen):
            self.app.push_screen(TelaAlterarSenha())
 
 class TelaRemover(Screen):
-    CSS = """
-    TelaRemover {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input {
-        margin-bottom: 1;
-    }
-
-    Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #mensagem {
-        margin-top: 1;
-        text-align: center;
-    }
-    """
 
     def compose(self):
         with Vertical(id="detalhes"):
@@ -438,21 +347,9 @@ class TelaRemover(Screen):
                 self.app.switch_screen(TelaMenu())
 
 class TelaDetalhesCurso(Screen):
-
-    CSS = """
-    TelaDetalhesCurso {
-        align: center middle;
-    }
-
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
+    
+    CSS = CSS_COMUM + """
     Button {
-        width: 100%;
         margin-top: 1;
     }
     """
@@ -482,34 +379,6 @@ class TelaDetalhesCurso(Screen):
             self.app.pop_screen()
 
 class TelaAlterarEmail(Screen):
-    CSS = """
-    TelaAlterarEmail {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-    }
-
-    #caixa_alterar_email {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #titulo_email, #mensagem_email {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
 
     def compose(self):
         with Vertical(id="caixa_alterar_email"):
@@ -548,35 +417,6 @@ class TelaAlterarEmail(Screen):
                 self.query_one("#mensagem_email", Static).update(f"[red]{mensagem}[/red]")
 
 class TelaConfirmarEmail(Screen):
-    CSS = """
-    TelaConfirmarEmail {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-    
-    #caixa_central {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-#titulo_codigo, #descricao_codigo, #mensagem_codigo {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
 
     # O __init__ é obrigatório nesta tela para receber o ID do usuário
     def __init__(self, user_id):
@@ -620,35 +460,6 @@ class TelaConfirmarEmail(Screen):
                 self.query_one("#mensagem_codigo", Static).update(f"[red]{mensagem}[/red]")
 
 class TelaAlterarSenha(Screen):
-    CSS = """
-    TelaAlterarSenha {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-        
-    #caixa_central {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #titulo_senha, #mensagem_senha {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
 
     def compose(self):
         with Vertical(id="caixa_central"):
@@ -679,37 +490,6 @@ class TelaAlterarSenha(Screen):
                 self.query_one("#mensagem_senha", Static).update(f"[red]{mensagem}[/red]")
 
 class TelaConfirmarSenha(Screen):
-
-
-    CSS = """
-    TelaConfirmarSenha {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-            
-    #caixa_central {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #descricao_codigo_senha, #mensagem_codigo_senha {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
 
     def __init__(self, user_id):
         super().__init__()
@@ -746,35 +526,6 @@ class TelaConfirmarSenha(Screen):
                 self.query_one("#mensagem_codigo_senha", Static).update(f"[red]{mensagem}[/red]")
 
 class TelaAlterarNome(Screen):
-    CSS = """
-    TelaAlterarNome {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-                
-    #caixa_central {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #titulo_nome, #mensagem_nome {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
 
     def compose(self):
         with Vertical(id="caixa_central"):
