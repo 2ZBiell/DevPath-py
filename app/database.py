@@ -28,17 +28,36 @@ class GerenciadorCursos():
                     plataforma TEXT NOT NULL,
                     linguagem TEXT NOT NULL,
                     descricao TEXT NOT NULL,
-                    gratuito BOOLEAN DEFAULT 0
+                    gratuito BOOLEAN DEFAULT 0,
+                    url_site TEXT DEFAULT ''
                 )
             """)
+
+            # Verifica se a coluna já existe
+            cursor.execute("PRAGMA table_info(cursos)")
+            colunas = [coluna[1] for coluna in cursor.fetchall()]
+
+            # Adiciona a coluna em bancos antigos
+            if "url_site" not in colunas:
+                cursor.execute("""
+                    ALTER TABLE cursos
+                    ADD COLUMN url_site TEXT DEFAULT ''
+                """)
 
             conexao.commit()
 
         finally:
             conexao.close()
-
-    def inserir_curso(self, nome, plataforma, linguagem,
-                      descricao, gratuito):
+    
+    def inserir_curso(
+        self,
+        nome,
+        plataforma,
+        linguagem,
+        descricao,
+        gratuito,
+        url_site=""
+    ):
         conexao = self.banco.conectar()
 
         try:
@@ -50,10 +69,18 @@ class GerenciadorCursos():
                     plataforma,
                     linguagem,
                     descricao,
-                    gratuito
+                    gratuito,
+                    url_site
                 )
-                VALUES (?, ?, ?, ?, ?)
-            """, (nome, plataforma, linguagem, descricao, gratuito))
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                nome,
+                plataforma,
+                linguagem,
+                descricao,
+                gratuito,
+                url_site
+            ))
 
             conexao.commit()
 
