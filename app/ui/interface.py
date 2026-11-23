@@ -1,12 +1,14 @@
 from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.widgets import Input, Button, Static, OptionList
+from textual.widgets import Input, Button, Static, OptionList, Select
 from textual.widgets.option_list import Option
-from app.cadastro_conta import Cadastrar_Conta, ValidarLogin
+from app.cadastro_conta import Cadastrar_Conta, ValidarLogin, gerenciador_usuarios
 from textual.containers import Vertical, Center
 from app.alterar_dados_da_contav2 import Solicitar_alteracao_email, Confirmar_codigo_email, Alterar_nome_de_usuario, Solicitar_alteracao_senha, Confirmar_codigo_senha
 from app.deletar_dados import Deletar_Usuario
 from app.buscar import busca_cursos
+from app.favoritos import gerenciador_favoritos
+from app.database import gerenciador_cursos
 
 
 # widgets: Input, Select, Button, DataTable, etc
@@ -18,33 +20,78 @@ from app.buscar import busca_cursos
 # menu - cadastro/ login/ alterar dados/ remover usuario
 # obs: quando o cadastro for feito libera o acesso a buscar cursos
 
+CSS_COMUM = """
+TelaCursos,
+TelaMenu,
+TelaCadastro,
+TelaLogin,
+TelaSucesso,
+TelaAtualizar,
+TelaRemover,
+TelaDetalhesCurso,
+TelaAlterarEmail,
+TelaConfirmarEmail,
+TelaAlterarSenha,
+TelaConfirmarSenha,
+TelaAlterarNome,
+TelaPainelAdmin,
+TelaFavoritos,
+TelaGerenciarCursos, {
+    align: center middle;
+    }
+
+/* Caixas principais */
+#detalhes,
+#caixa_menu,
+#caixa_alterar_email,
+#caixa_central {
+    width: 70;
+    height: auto;
+    padding: 2;
+    border: round cyan;
+}
+
+/* Campos e botões */
+Input,
+Button {
+    align: center middle;
+    width: 100%;
+    margin-bottom: 1;
+}
+
+/* Títulos */
+#titulo,
+#titulo_email,
+#titulo_codigo,
+#titulo_senha,
+#titulo_nome,
+#titulo_codigo_senha {
+    width: 100%;
+    text-align: center;
+    margin: 1 0;
+}
+
+/* Mensagens */
+#mensagem,
+#mensagem_email,
+#mensagem_codigo,
+#mensagem_senha,
+#mensagem_nome,
+#mensagem_codigo_senha {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 1;
+}
+"""
+
 class TelaCursos(Screen):
-
-    CSS = """
-    TelaCursos {
-        align: center middle;
-    }
-
+    CSS = CSS_COMUM + """
     #titulo {
-        width: 100%;
-        text-align: center;
         margin: 1 0;
     }
 
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input {
-        width: 100%;
-        margin: 1 0;
-    }
-
+    Input,
     Button {
-        width: 100%;
         margin: 1 0;
     }
     """
@@ -104,14 +151,9 @@ class TelaCursos(Screen):
                 break
 
 class TelaMenu(Screen):
-
-    CSS = """
-    TelaMenu {
-        align: center middle;
-    }
-
+    CSS = CSS_COMUM + """
     #botoes {
-        width: 40;
+        width: 50;
         height: auto;
         align: center middle;
         margin: 0;
@@ -124,11 +166,10 @@ class TelaMenu(Screen):
         content-align: center middle;
         text-style: bold;
         margin-bottom: 1;
-
     }
 
     #botoes > Button {
-        width: 40;
+        width: 100%;
         margin: 1 0;
     }
     """
@@ -142,58 +183,40 @@ class TelaMenu(Screen):
             )
             yield Button("Cadastrar usuário", id="cadastrar")
             yield Button("Login", id="login")
+            yield Button("Meus Favoritos", id="favoritos")
             yield Button("Alterar dados", id="alterar")
             yield Button("Remover Usuário", id="remover")
             yield Button("Sair", id="sair")
 
     def on_button_pressed(self, event):
+
         if event.button.id == 'cadastrar':
-            # tela de cadastro
             self.app.push_screen(TelaCadastro())
 
         elif event.button.id == 'login':
             self.app.push_screen(TelaLogin())
+
+        elif event.button.id == 'favoritos':
+
+            if not self.app.usuario_atual:
+                self.app.destino_apos_login = "favoritos"
+                self.app.push_screen(TelaLogin())
+            else:
+                self.app.push_screen(TelaFavoritos())
 
         elif event.button.id == 'alterar':
             self.app.push_screen(TelaAtualizar())
 
         elif event.button.id == 'remover':
             self.app.push_screen(TelaRemover())
-        
+
         elif event.button.id == 'sair':
             self.app.exit()
             return
 
 class TelaCadastro(Screen):
 
-    CSS = """
-    TelaCadastro {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input {
-        width: 100%;
-        margin: 1 0;
-    }
-
-    Button {
-        width: 100%;
-        margin: 1 0;
-    }
-    """
+    CSS = CSS_COMUM
 
     def compose(self):
         with Vertical(id="detalhes"):
@@ -230,43 +253,7 @@ class TelaCadastro(Screen):
 
 class TelaLogin(Screen):
 
-    CSS = """
-    TelaLogin {
-        align: center middle;
-    }
-
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        text-style: bold;
-        margin-bottom: 2;
-    }
-
-    Input {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    Button {
-        width: 100%;
-        margin-bottom: 1;
-        align: center middle;
-    }
-
-    #mensagem {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
+    CSS = CSS_COMUM
 
     def compose(self):
         with Vertical(id="detalhes"):
@@ -278,28 +265,56 @@ class TelaLogin(Screen):
             yield Button("← Voltar", id="voltar")
        
 
+    
     def on_button_pressed(self, event):
+
         if event.button.id == "voltar":
             self.app.pop_screen()
             return
 
         elif event.button.id == "logar":
+
             email = self.query_one("#email", Input).value
             senha = self.query_one("#senha", Input).value
 
-            sucesso, mensagem = ValidarLogin(email, senha)
-        if sucesso:
-            self.app.push_screen(TelaCursos())
-        else:
-            self.query_one("#mensagem", Static).update(mensagem)
+            usuario = gerenciador_usuarios.obter_usuario(
+                email,
+                senha
+            )
+
+            if usuario:
+                self.app.usuario_atual = usuario
+
+                destino = getattr(
+                    self.app,
+                    "destino_apos_login",
+                    None
+                )
+
+                self.app.destino_apos_login = None
+
+                if destino == "favoritos":
+                    self.app.push_screen(TelaFavoritos())
+
+                else:
+                    tipo = usuario["tipo"]
+
+                    if tipo == "administrador":
+                        self.app.push_screen(TelaPainelAdmin())
+
+                    elif tipo == "gerente":
+                        self.app.push_screen(TelaGerenciarCursos())
+
+                    else:
+                        self.app.push_screen(TelaCursos())
+
+            else:
+                self.query_one("#mensagem", Static).update(
+                    "Email ou senha incorretos."
+                )
 
 class TelaSucesso(Screen):
-
-    CSS = """
-    TelaSucesso {
-        align: center middle;
-    }
-
+    CSS = CSS_COMUM + """
     #resultado {
         width: 40;
         height: auto;
@@ -307,7 +322,7 @@ class TelaSucesso(Screen):
         margin: 0;
     }
 
-    Button {
+    #resultado > Button {
         width: 40;
         margin: 1 0;
     }
@@ -324,27 +339,12 @@ class TelaSucesso(Screen):
             self.app.switch_screen(TelaCursos())    
 
 class TelaAtualizar(Screen):
-    CSS = """
-    TelaAtualizar {
-        align: center middle;
-    }
-
+    CSS = CSS_COMUM + """
     #caixa_menu {
-        width: 70;
-        height: auto;
         align: center middle;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Button {
-        width: 100%;
-        margin-bottom: 1;
     }
 
     #titulo {
-        width: 100%;
-        text-align: center;
         text-style: bold;
         margin-bottom: 2;
     }
@@ -375,38 +375,8 @@ class TelaAtualizar(Screen):
            self.app.push_screen(TelaAlterarSenha())
 
 class TelaRemover(Screen):
-    CSS = """
-    TelaRemover {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input {
-        margin-bottom: 1;
-    }
-
-    Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #mensagem {
-        margin-top: 1;
-        text-align: center;
-    }
-    """
+    
+    CSS = CSS_COMUM
 
     def compose(self):
         with Vertical(id="detalhes"):
@@ -440,20 +410,8 @@ class TelaRemover(Screen):
 
 class TelaDetalhesCurso(Screen):
 
-    CSS = """
-    TelaDetalhesCurso {
-        align: center middle;
-    }
-
-    #detalhes {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
+    CSS = CSS_COMUM + """
     Button {
-        width: 100%;
         margin-top: 1;
     }
     """
@@ -472,45 +430,121 @@ class TelaDetalhesCurso(Screen):
                 f"[bold]{curso[1]}[/]",
                 markup=True
             )
+
             yield Static(f"Plataforma: {curso[2]}")
             yield Static(f"Linguagem: {curso[3]}")
             yield Static(f"Gratuito: {gratuito}")
             yield Static(f"\nDescrição:\n{curso[4]}")
-            yield Button("← Voltar aos resultados", id="voltar")
+
+            yield Button(
+                "♡ Favoritar curso",
+                id="favoritar"
+            )
+
+            yield Static("", id="mensagem_favorito")
+
+            yield Button(
+                "🌐 Visitar site oficial",
+                id="visitar"
+            )
+
+            yield Static("", id="mensagem_site")
+
+            yield Button(
+                "← Voltar aos resultados",
+                id="voltar"
+            )
+
+    def on_mount(self):
+        usuario = self.app.usuario_atual
+
+        if not usuario:
+            return
+
+        usuario_id = usuario["id"]
+        curso_id = self.curso[0]
+
+        favorito = gerenciador_favoritos.verificar_favorito(
+            usuario_id,
+            curso_id
+        )
+
+        botao = self.query_one("#favoritar", Button)
+
+        if favorito:
+            botao.label = "♥ Remover dos favoritos"
+        else:
+            botao.label = "♡ Favoritar curso"
 
     def on_button_pressed(self, event):
+
         if event.button.id == "voltar":
             self.app.pop_screen()
+            return
+
+        elif event.button.id == "visitar":
+
+            url = self.curso[6] if len(self.curso) > 6 else ""
+
+            if url and url.strip().startswith(("https://", "http://")):
+                self.app.open_url(url.strip())
+            else:
+                self.query_one(
+                    "#mensagem_site",
+                    Static
+                ).update("Link oficial não cadastrado.")
+
+            return
+
+        elif event.button.id == "favoritar":
+
+            usuario = self.app.usuario_atual
+
+            if not usuario:
+                self.query_one(
+                    "#mensagem_favorito",
+                    Static
+                ).update("Faça login para favoritar cursos.")
+                return
+
+            usuario_id = usuario["id"]
+            curso_id = self.curso[0]
+
+            favorito = gerenciador_favoritos.verificar_favorito(
+                usuario_id,
+                curso_id
+            )
+
+            if favorito:
+                sucesso, mensagem = (
+                    gerenciador_favoritos.desfavoritar_curso(
+                        usuario_id,
+                        curso_id
+                    )
+                )
+            else:
+                sucesso, mensagem = (
+                    gerenciador_favoritos.favoritar_curso(
+                        usuario_id,
+                        curso_id
+                    )
+                )
+
+            self.query_one(
+                "#mensagem_favorito",
+                Static
+            ).update(mensagem)
+
+            if sucesso:
+                botao = self.query_one("#favoritar", Button)
+
+                if favorito:
+                    botao.label = "♡ Favoritar curso"
+                else:
+                    botao.label = "♥ Remover dos favoritos"
 
 class TelaAlterarEmail(Screen):
-    CSS = """
-    TelaAlterarEmail {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-    }
-
-    #caixa_alterar_email {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #titulo_email, #mensagem_email {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
+    CSS = CSS_COMUM
 
     def compose(self):
         with Vertical(id="caixa_alterar_email"):
@@ -549,35 +583,7 @@ class TelaAlterarEmail(Screen):
                 self.query_one("#mensagem_email", Static).update(f"[red]{mensagem}[/red]")
 
 class TelaConfirmarEmail(Screen):
-    CSS = """
-    TelaConfirmarEmail {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-    
-    #caixa_central {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #titulo_codigo, #descricao_codigo, #mensagem_codigo {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
+    CSS = CSS_COMUM
 
     # O __init__ é obrigatório nesta tela para receber o ID do usuário
     def __init__(self, user_id):
@@ -621,35 +627,7 @@ class TelaConfirmarEmail(Screen):
                 self.query_one("#mensagem_codigo", Static).update(f"[red]{mensagem}[/red]")
 
 class TelaAlterarSenha(Screen):
-    CSS = """
-    TelaAlterarSenha {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-        
-    #caixa_central {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #titulo_senha, #mensagem_senha {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
+    CSS = CSS_COMUM
 
     def compose(self):
         with Vertical(id="caixa_central"):
@@ -680,37 +658,7 @@ class TelaAlterarSenha(Screen):
                 self.query_one("#mensagem_senha", Static).update(f"[red]{mensagem}[/red]")
 
 class TelaConfirmarSenha(Screen):
-
-
-    CSS = """
-    TelaConfirmarSenha {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-            
-    #caixa_central {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #descricao_codigo_senha, #mensagem_codigo_senha {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
+    CSS = CSS_COMUM
 
     def __init__(self, user_id):
         super().__init__()
@@ -747,35 +695,7 @@ class TelaConfirmarSenha(Screen):
                 self.query_one("#mensagem_codigo_senha", Static).update(f"[red]{mensagem}[/red]")
 
 class TelaAlterarNome(Screen):
-    CSS = """
-    TelaAlterarNome {
-        align: center middle;
-    }
-
-    #titulo {
-        width: 100%;
-        text-align: center;
-        margin: 1 0;
-    }
-                
-    #caixa_central {
-        width: 70;
-        height: auto;
-        padding: 2;
-        border: round cyan;
-    }
-
-    Input, Button {
-        width: 100%;
-        margin-bottom: 1;
-    }
-
-    #titulo_nome, #mensagem_nome {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 1;
-    }
-    """
+    CSS = CSS_COMUM
 
     def compose(self):
         with Vertical(id="caixa_central"):
@@ -811,4 +731,295 @@ class TelaAlterarNome(Screen):
             else:
                 # Exibe o erro (ex: senha incorreta ou nome já existe)
                 self.query_one("#mensagem_nome", Static).update(f"[red]{mensagem}[/red]")
-                
+
+class TelaPainelAdmin(Screen):
+
+    CSS = CSS_COMUM + """
+    #lista_usuarios {
+        height: auto;
+        margin: 1 0;
+    }
+
+    #mensagem_admin {
+        margin: 1 0;
+        text-align: center;
+    }
+    """
+
+    def compose(self):
+        with Vertical(id="detalhes"):
+            yield Static("PAINEL ADMINISTRATIVO", id="titulo")
+            yield Static("Usuários cadastrados:",id="subtitulo")
+            yield Static("Carregando usuários...",id="lista_usuarios")
+            yield Input(placeholder="E-mail do usuário",id="email_gerente")
+            yield Button("Gerenciar cursos", id="gerenciar_cursos")
+            yield Button("Autorizar como gerente",id="autorizar")
+            yield Button("Remover permissão de gerente",id="remover_gerente")
+            yield Static("", id="mensagem_admin")
+            yield Button("← Voltar", id="voltar")
+
+    def on_mount(self):
+        # Impede que uma conta comum abra o painel
+        usuario = self.app.usuario_atual
+
+        if not usuario or usuario["tipo"] != "administrador":
+            self.app.pop_screen()
+            return
+
+        self.atualizar_lista()
+
+    def atualizar_lista(self):
+
+        usuarios = gerenciador_usuarios.listar_usuarios()
+
+        texto = ""
+
+        for email, nome, tipo in usuarios:
+            texto += f"{nome} | {email} | {tipo}\n"
+
+        if not texto:
+            texto = "Nenhum usuário cadastrado."
+
+        self.query_one("#lista_usuarios", Static).update(texto)
+
+    def on_button_pressed(self, event):
+
+        if event.button.id == "gerenciar_cursos":
+            self.app.push_screen(TelaGerenciarCursos())
+            return
+
+        if event.button.id == "voltar":
+            self.app.pop_screen()
+            return
+
+        usuario = self.app.usuario_atual
+
+        if not usuario or usuario["tipo"] != "administrador":
+            self.query_one("#mensagem_admin", Static).update(
+                "Acesso não autorizado."
+            )
+            return
+
+        email_alvo = self.query_one(
+            "#email_gerente", Input
+        ).value.strip()
+
+        email_admin = usuario["email"]
+
+        if event.button.id == "autorizar":
+
+            sucesso, mensagem = (
+                gerenciador_usuarios.autorizar_gerente(
+                    email_alvo,
+                    email_admin
+                )
+            )
+
+        elif event.button.id == "remover_gerente":
+
+            sucesso, mensagem = (
+                gerenciador_usuarios.remover_permissao_gerente(
+                    email_alvo,
+                    email_admin
+                )
+            )
+
+        else:
+            return
+
+        self.query_one("#mensagem_admin", Static).update(mensagem)
+
+        if sucesso:
+            self.query_one("#email_gerente", Input).value = ""
+            self.atualizar_lista()
+
+class TelaFavoritos(Screen):
+
+    CSS = CSS_COMUM + """
+    #titulo {
+        margin: 1 0;
+    }
+
+    Button {
+        margin: 1 0;
+    }
+    """
+
+    def compose(self):
+        with Vertical(id="detalhes"):
+            yield Static("MEUS FAVORITOS", id="titulo")
+            yield Static("", id="mensagem")
+            yield OptionList(id="resultados")
+            yield Button("↻ Atualizar favoritos", id="atualizar")
+            yield Button("← Voltar", id="voltar")
+
+    def on_mount(self):
+        self.atualizar_lista()
+
+    def atualizar_lista(self):
+
+        usuario = self.app.usuario_atual
+
+        if not usuario:
+            self.query_one("#mensagem", Static).update(
+                "Faça login para visualizar seus favoritos."
+            )
+            return
+
+        favoritos = gerenciador_favoritos.listar_favoritos(
+            usuario["id"]
+        )
+
+        self.favoritos = favoritos
+
+        lista = self.query_one("#resultados", OptionList)
+        mensagem = self.query_one("#mensagem", Static)
+
+        lista.clear_options()
+
+        if favoritos:
+
+            for curso in favoritos:
+                lista.add_option(
+                    Option(
+                        f'{curso["nome"]} | {curso["plataforma"]}',
+                        id=str(curso["id"])
+                    )
+                )
+
+            mensagem.update(
+                "Selecione um curso para visualizar os detalhes."
+            )
+
+        else:
+            mensagem.update(
+                "Você ainda não possui cursos favoritos."
+            )
+
+    def on_button_pressed(self, event):
+
+        if event.button.id == "voltar":
+            self.app.pop_screen()
+            return
+
+        if event.button.id == "atualizar":
+            self.atualizar_lista()
+
+    def on_option_list_option_selected(
+        self, event: OptionList.OptionSelected
+    ):
+
+        curso_id = int(event.option.id)
+
+        for curso in self.favoritos:
+
+            if curso["id"] == curso_id:
+
+                dados_curso = (
+                    curso["id"],
+                    curso["nome"],
+                    curso["plataforma"],
+                    curso["linguagem"],
+                    curso["descricao"],
+                    curso["gratuito"]
+                )
+
+                self.app.push_screen(
+                    TelaDetalhesCurso(dados_curso)
+                )
+
+                break
+
+class TelaGerenciarCursos(Screen):
+
+    CSS = CSS_COMUM + """
+    #titulo {
+        margin: 1 0;
+    }
+
+    Input,
+    Button {
+        margin: 1 0;
+    }
+
+    #mensagem_gerencia {
+        margin: 1 0;
+        text-align: center;
+    }
+    """
+
+    def compose(self):
+        with Vertical(id="detalhes"):
+            yield Static("GERENCIAMENTO DE CURSOS", id="titulo")
+            yield Input(placeholder="Nome do curso...",id="nome")
+            yield Input(placeholder="Plataforma (Ex: Udemy, Coursera...)",id="plataforma")
+            yield Input(placeholder="Linguagem (Ex: Python, Java...)",id="linguagem")
+            yield Input(placeholder="Descrição do curso...",id="descricao")
+            yield Input(placeholder="Gratuito? Digite 1 para sim ou 0 para não",id="gratuito")
+            yield Input(placeholder="Link oficial do curso (https://...)",id="url_site")
+            yield Button("Cadastrar curso", id="cadastrar")
+            yield Static("", id="mensagem_gerencia")
+            yield Button("← Voltar", id="voltar")
+
+    def on_mount(self):
+        usuario = self.app.usuario_atual
+
+        if not usuario or usuario.get("tipo") not in (
+            "administrador",
+            "gerente"
+        ):
+            self.app.pop_screen()
+
+    def on_button_pressed(self, event):
+
+        if event.button.id == "voltar":
+            self.app.pop_screen()
+            return
+
+        if event.button.id == "cadastrar":
+
+            nome = self.query_one("#nome", Input).value.strip()
+            plataforma = self.query_one("#plataforma", Input).value.strip()
+            linguagem = self.query_one("#linguagem", Input).value.strip()
+            descricao = self.query_one("#descricao", Input).value.strip()
+            gratuito_texto = self.query_one("#gratuito", Input).value.strip()
+            url_site = self.query_one("#url_site", Input).value.strip()
+
+            mensagem = self.query_one("#mensagem_gerencia", Static)
+
+            if not nome or not plataforma or not linguagem or not descricao:
+                mensagem.update("Preencha todos os campos obrigatórios.")
+                return
+
+            if gratuito_texto not in ("0", "1"):
+                mensagem.update("Gratuito deve ser 1 (sim) ou 0 (não).")
+                return
+
+            if url_site and not url_site.startswith(("https://", "http://")):
+                mensagem.update("Informe um link válido começando com http:// ou https://.")
+                return
+
+            gratuito = int(gratuito_texto)
+
+            try:
+                gerenciador_cursos.inserir_curso(
+                    nome,
+                    plataforma,
+                    linguagem,
+                    descricao,
+                    gratuito,
+                    url_site
+                )
+
+                mensagem.update("Curso cadastrado com sucesso!")
+
+                # Limpa os campos após o cadastro
+                self.query_one("#nome", Input).value = ""
+                self.query_one("#plataforma", Input).value = ""
+                self.query_one("#linguagem", Input).value = ""
+                self.query_one("#descricao", Input).value = ""
+                self.query_one("#gratuito", Input).value = "1"
+                self.query_one("#url_site", Input).value = ""
+
+            except Exception as erro:
+                mensagem.update(f"Erro ao cadastrar curso: {erro}")
