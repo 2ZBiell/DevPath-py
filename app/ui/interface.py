@@ -94,26 +94,133 @@ class TelaCursos(Screen):
     Button {
         margin: 1 0;
     }
+
+    #titulo_preco {
+        margin-top: 1;
+        margin-bottom: 0;
+        text-style: bold;
+    }
+
     """
 
     def compose(self):
         with Vertical(id="detalhes"):
             yield Static("BUSCAR CURSOS", id="titulo")
-            yield Input(placeholder="Digite o nome do curso. . .", id="nome")
+            yield Input(placeholder="Digite o nome do curso...",id="nome")
+
+            yield Select(
+                [
+                    ("Todas as plataformas", ""),
+                    ("Curso em Vídeo", "Curso em Vídeo"),
+                    ("freeCodeCamp", "freeCodeCamp"),
+                    ("Corujinhas", "Corujinhas"),
+                    ("CURSA", "CURSA"),
+                    ("EV.G", "EV.G"),
+                    ("IFRS", "IFRS")
+                ],
+                prompt="Selecione a plataforma",
+                value="",
+                id="plataforma"
+            )
+
+            yield Select(
+                [
+                    ("Todas as tecnologias", ""),
+                    ("Python", "Python"),
+                    ("C++", "C++"),
+                    ("Java", "Java"),
+                    ("JavaScript", "JavaScript"),
+                    ("PHP", "PHP"),
+                    ("HTML e CSS", "HTML e CSS"),
+                    ("Git", "Git"),
+                    ("GitHub", "GitHub"),
+                    ("SQL", "SQL"),
+                    ("Banco de Dados", "Banco de Dados"),
+                    ("Lógica de Programação", "Lógica de Programação"),
+                    ("Desenvolvimento Web", "Desenvolvimento Web"),
+                    ("Informática", "Informática"),
+                    ("Ciência de Dados", "Ciência de Dados"),
+                    ("Inteligência Artificial", "Inteligência Artificial")
+                ],
+                prompt="Selecione a tecnologia",
+                value="",
+                id="linguagem"
+            )
+
+            yield Select(
+                [
+                    ("Todos os preços", "todos"),
+                    ("Gratuitos", "gratuito"),
+                    ("Pagos", "pago")
+                ],
+                prompt="Selecione o preço",
+                value="todos",
+                id="gratuito"
+            )
+
             yield Button("Buscar", id="busca")
+            yield Button("Limpar filtros", id="limpar")
             yield Static("", id="mensagem")
             yield OptionList(id="resultados")
             yield Button("← Voltar", id="voltar")
 
     def on_button_pressed(self, event):
+
+        
+
+        if event.button.id == "limpar":
+            self.query_one("#nome", Input).value = ""
+            self.query_one("#plataforma", Select).value = ""
+            self.query_one("#linguagem", Select).value = ""
+            self.query_one("#gratuito", Select).value = "todos"
+            self.query_one("#resultados", OptionList).clear_options()
+            self.query_one("#mensagem", Static).update("Filtros limpos. Faça uma nova busca.")
+            self.cursos = []
+
+            return
+
         if event.button.id == "voltar":
             self.app.pop_screen()
             return
 
         if event.button.id == "busca":
+
             nome = self.query_one("#nome", Input).value.strip()
 
-            resultados = busca_cursos.buscar(nome_do_curso=nome)
+            plataforma = self.query_one("#plataforma", Select).value
+            linguagem = self.query_one("#linguagem", Select).value
+            gratuito = self.query_one("#gratuito", Select).value
+
+            # Conversão do filtro de preço
+            if gratuito == "gratuito":
+                gratuito = 1
+
+            elif gratuito == "pago":
+                gratuito = 0
+
+            else:
+                gratuito = None
+
+            # Conversão dos demais filtros
+            if plataforma == "":
+                plataforma = None
+
+            if linguagem == "":
+                linguagem = None
+
+            # Corrige valores não selecionados do Textual
+            if plataforma is Select.NULL:
+                plataforma = None
+
+            if linguagem is Select.NULL:
+                linguagem = None
+
+            resultados = busca_cursos.buscar(
+                nome_do_curso=nome,
+                plataforma=plataforma,
+                linguagem=linguagem,
+                gratuito=gratuito
+            )
 
             lista = self.query_one("#resultados", OptionList)
             mensagem = self.query_one("#mensagem", Static)
@@ -123,12 +230,13 @@ class TelaCursos(Screen):
 
             if resultados:
                 for curso in resultados:
+
                     nome_curso = curso[1]
-                    plataforma = curso[2]
+                    plataforma_curso = curso[2]
 
                     lista.add_option(
                         Option(
-                            f"{nome_curso} | {plataforma}",
+                            f"{nome_curso} | {plataforma_curso}",
                             id=str(curso[0])
                         )
                     )
@@ -138,16 +246,18 @@ class TelaCursos(Screen):
             else:
                 mensagem.update("Nenhum curso encontrado.")
 
-    def on_option_list_option_selected(
-        self, event: OptionList.OptionSelected
-    ):
-        curso_id = int(event.option.id)
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected):
 
+        # Recupera o ID do curso selecionado
+        curso_id = event.option.id
+
+        # Procura o curso correspondente na lista de resultados
         for curso in self.cursos:
-            if curso[0] == curso_id:
-                self.app.push_screen(
-                    TelaDetalhesCurso(curso)
-                )
+
+            if str(curso[0]) == curso_id:
+
+                # Abre a tela de detalhes enviando os dados do curso
+                self.app.push_screen(TelaDetalhesCurso(curso))
                 break
 
 class TelaMenu(Screen):
