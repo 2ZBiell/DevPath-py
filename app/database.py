@@ -94,6 +94,12 @@ class GerenciadorCursos():
     linguagem=None,
     gratuito=None
 ):
+        nome_do_curso = nome_do_curso.strip()
+
+        # Impede pesquisas vazias ou contendo apenas espaços
+        if not nome_do_curso and plataforma is None and linguagem is None and gratuito is None:
+            return []
+
         conexao = self.banco.conectar()
 
         try:
