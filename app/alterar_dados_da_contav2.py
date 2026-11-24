@@ -1,89 +1,64 @@
-import os
 import re
 import secrets
-import smtplib
 import sqlite3
-from email.message import EmailMessage
 
-from dotenv import load_dotenv
 from app.cadastro_conta import Conectar_Banco
-
 
 # Carrega as variáveis do arquivo .env.
 # A senha do aplicativo NÃO fica escrita neste arquivo.
-load_dotenv()
-
 
 class ServicoEmail:
-    """Responsável pelo envio dos códigos de verificação por e-mail."""
-
-    def __init__(self):
-        self.email_remetente = os.getenv("DEVPATH_EMAIL")
-        self.senha_app_email = os.getenv("DEVPATH_EMAIL_APP_PASSWORD")
+    """Simula o envio dos códigos de verificação por e-mail."""
 
     def enviar_codigo(self, destinatario, token, tipo):
-        """
-        Envia um código de verificação.
-        tipo deve ser 'email' ou 'senha'.
-        """
-        assuntos = {
-            "email": "Alteração de E-mail no DevPath",
-            "senha": "Alteração de Senha no DevPath",
-        }
-
-        mensagens = {
-            "email": (
-                "Se você solicitou a alteração do e-mail da sua conta, "
-                f"seu código de verificação de 6 dígitos é: {token}"
-            ),
-            "senha": (
-                "Se você solicitou a alteração de senha da sua conta, "
-                f"seu código de verificação de 6 dígitos é: {token}"
-            ),
-        }
-
-        if tipo not in assuntos:
-            print("Tipo de e-mail inválido.")
+        if tipo not in ("email", "senha"):
+            print("Tipo de verificação inválido.")
             return False
 
-        if not self.email_remetente or not self.senha_app_email:
-            print(
-                "Configuração de e-mail ausente. "
-                "Verifique DEVPATH_EMAIL e DEVPATH_EMAIL_APP_PASSWORD no .env."
-            )
-            return False
+        print("\n========== DEVPATH ==========")
+        print(f"Destinatário: {destinatario}")
+        print(f"Tipo de verificação: {tipo}")
+        print(f"Código de verificação: {token}")
+        print("=============================\n")
 
-        mensagem = EmailMessage()
-        mensagem["Subject"] = assuntos[tipo]
-        mensagem["From"] = self.email_remetente
-        mensagem["To"] = destinatario
-        mensagem.set_content(
-            f"""Olá,
-
-{mensagens[tipo]}
-
-Se você não solicitou essa alteração, por favor ignore esta mensagem.
-"""
-        )
-
-        try:
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-                smtp.login(self.email_remetente, self.senha_app_email)
-                smtp.send_message(mensagem)
-
-            return True
-
-        except Exception as erro:
-            print(f"Erro ao enviar o e-mail via SMTP: {erro}")
-            return False
-
+        return True
 
 class GerenciadorConta:
     """Reúne as operações de alteração dos dados de uma conta."""
 
+   
     def __init__(self, servico_email=None, conectar_banco=None):
         self.servico_email = servico_email or ServicoEmail()
         self.conectar_banco = conectar_banco or Conectar_Banco
+
+        self.garantir_colunas_verificacao()
+
+
+    def garantir_colunas_verificacao(self):
+        conexao = self.conectar_banco()
+
+        try:
+            cursor = conexao.cursor()
+
+            cursor.execute("PRAGMA table_info(usuarios)")
+            colunas = [coluna[1] for coluna in cursor.fetchall()]
+
+            novas_colunas = {
+                "novo_email_pendente": "TEXT",
+                "nova_senha_pendente": "TEXT",
+                "token_verificacao": "TEXT"
+            }
+
+            for nome, tipo in novas_colunas.items():
+                if nome not in colunas:
+                    cursor.execute(
+                        f"ALTER TABLE usuarios ADD COLUMN {nome} {tipo}"
+                    )
+
+            conexao.commit()
+
+        finally:
+            conexao.close()
 
     @staticmethod
     def _gerar_token():
@@ -94,10 +69,10 @@ class GerenciadorConta:
         padrao_email = r"^[\w\.-]+@[\w\.-]+\.\w+$"
 
         if not re.match(padrao_email, novo_email):
-            return False, "Digite um formato de e-mail válido.", None
+            return False, "Digite um formato de e-mail válido.", None, None
 
         if novo_email == email_atual:
-            return False, "O e-mail novo não pode ser igual ao atual.", None
+            return False, "O e-mail novo não pode ser igual ao atual.", None, None
 
         conexao = self.conectar_banco()
 
@@ -114,7 +89,7 @@ class GerenciadorConta:
             usuario = cursor.fetchone()
 
             if not usuario:
-                return False, "E-mail atual ou senha incorretos.", None
+                return False, "E-mail atual ou senha incorretos.", None, None
 
             usuario_id = usuario[0]
             token = self._gerar_token()
@@ -132,14 +107,15 @@ class GerenciadorConta:
             if self.servico_email.enviar_codigo(novo_email, token, "email"):
                 return (
                     True,
-                    "Código enviado com sucesso para o novo e-mail!",
+                    "Código de demonstração gerado com sucesso!",
                     usuario_id,
+                    token
                 )
 
-            return False, "Erro ao tentar enviar o código por e-mail.", None
+            return False, "Erro ao tentar gerar o código de verificação.", None, None
 
         except Exception as erro:
-            return False, f"Erro inesperado no banco: {erro}", None
+            return False, f"Erro inesperado no banco: {erro}", None, None
 
         finally:
             conexao.close()
@@ -194,10 +170,10 @@ class GerenciadorConta:
 
     def solicitar_alteracao_senha(self, email_atual, senha_atual, nova_senha):
         if senha_atual == nova_senha:
-            return False, "A nova senha não pode ser igual à atual.", None
+            return False, "A nova senha não pode ser igual à atual.", None, None
 
         if len(nova_senha) < 6:
-            return False, "A nova senha deve ter pelo menos 6 caracteres.", None
+            return False, "A nova senha deve ter pelo menos 6 caracteres.", None, None
 
         conexao = self.conectar_banco()
 
@@ -214,7 +190,7 @@ class GerenciadorConta:
             usuario = cursor.fetchone()
 
             if not usuario:
-                return False, "E-mail ou senha atuais incorretos.", None
+                return False, "E-mail ou senha atuais incorretos.", None, None
 
             usuario_id = usuario[0]
             token = self._gerar_token()
@@ -232,14 +208,15 @@ class GerenciadorConta:
             if self.servico_email.enviar_codigo(email_atual, token, "senha"):
                 return (
                     True,
-                    "Código enviado com sucesso para o seu e-mail!",
+                    "Código de demonstração gerado com sucesso!",
                     usuario_id,
+                    token
                 )
 
-            return False, "Erro ao tentar enviar o código por e-mail.", None
+            return False, "Erro ao tentar gerar o código de verificação.", None, None
 
         except Exception as erro:
-            return False, f"Erro inesperado no banco: {erro}", None
+            return False, f"Erro inesperado no banco: {erro}", None, None
 
         finally:
             conexao.close()

@@ -554,7 +554,6 @@ class TelaAlterarEmail(Screen):
             yield Input(placeholder="E-mail atual", id="email_atual")
             yield Input(placeholder="Senha", password=True, id="senha")
             yield Input(placeholder="Novo E-mail desejado", id="novo_email")
-        
             yield Button("Solicitar Código", id="btn_solicitar", variant="primary")
             yield Button("← Cancelar", id="btn_cancelar")
         
@@ -572,33 +571,35 @@ class TelaAlterarEmail(Screen):
             novo_email = self.query_one("#novo_email", Input).value.strip()
 
             # Chama a função do backend 
-            sucesso, mensagem, user_id = Solicitar_alteracao_email(email, senha, novo_email)
+            sucesso, mensagem, user_id, codigo = Solicitar_alteracao_email(email, senha, novo_email)
 
             if sucesso:
-                # Se os dados estiverem corretos e o e-mail for enviado, 
-                # abre a tela do código e envia o 'user_id'.
-                self.app.push_screen(TelaConfirmarEmail(user_id=user_id))
+                self.app.push_screen(
+                    TelaConfirmarEmail(user_id=user_id, codigo=codigo)
+                )
             else:
-                # senha errada, e-mail inválido, mostra o erro no ecrã.
-                self.query_one("#mensagem_email", Static).update(f"[red]{mensagem}[/red]")
+                self.query_one("#mensagem_email", Static).update(
+                    f"[red]{mensagem}[/red]"
+                )
 
 class TelaConfirmarEmail(Screen):
     CSS = CSS_COMUM
 
     # O __init__ é obrigatório nesta tela para receber o ID do usuário
-    def __init__(self, user_id):
+    def __init__(self, user_id, codigo):
         super().__init__()
         self.user_id = user_id
+        self.codigo = codigo
 
     def compose(self):
         with Vertical(id="caixa_central"):
             yield Static("[bold]CÓDIGO DE VERIFICAÇÃO[/bold]", id='titulo',markup=True)
+            yield Static(f"[bold yellow]CÓDIGO DE DEMONSTRAÇÃO: {self.codigo}[/bold yellow]",markup=True)
+            yield Static("O envio do e-mail está simulado nesta versão.")
             yield Static("Enviamos um código de 6 dígitos para o seu novo e-mail.\nVerifique também a caixa de spam.")
             yield Input(placeholder="Digite o código (Ex: 123456)", id="codigo")
-        
             yield Button("Confirmar Alteração", id="btn_confirmar", variant="primary")
             yield Button("← Cancelar", id="btn_cancelar", variant="error")
-        
             yield Static("", id="mensagem_codigo")
 
     def on_button_pressed(self, event):
@@ -650,23 +651,30 @@ class TelaAlterarSenha(Screen):
             nova_senha = self.query_one("#nova_senha", Input).value
 
             # Chama a função que criámos acima
-            sucesso, mensagem, user_id = Solicitar_alteracao_senha(email, senha, nova_senha)
+            sucesso, mensagem, user_id, codigo = Solicitar_alteracao_senha(email, senha, nova_senha)
 
             if sucesso:
-                self.app.push_screen(TelaConfirmarSenha(user_id=user_id))
+                self.app.push_screen(
+                    TelaConfirmarSenha(user_id=user_id, codigo=codigo)
+                )
             else:
-                self.query_one("#mensagem_senha", Static).update(f"[red]{mensagem}[/red]")
+                self.query_one("#mensagem_senha", Static).update(
+                    f"[red]{mensagem}[/red]"
+                )
 
 class TelaConfirmarSenha(Screen):
     CSS = CSS_COMUM
 
-    def __init__(self, user_id):
+    def __init__(self, user_id, codigo):
         super().__init__()
         self.user_id = user_id
+        self.codigo = codigo
 
     def compose(self):
         with Vertical(id="caixa_central"):
             yield Static("[bold]CÓDIGO DE VERIFICAÇÃO[/bold]", id="titulo_codigo_senha", markup=True)
+            yield Static(f"[bold yellow]CÓDIGO DE DEMONSTRAÇÃO: {self.codigo}[/bold yellow]",markup=True)
+            yield Static("O envio do e-mail está simulado nesta versão.")
             yield Static("Enviámos um código de 6 dígitos para o seu e-mail.\nVerifique também a caixa de spam.", id="descricao_codigo_senha")
             yield Input(placeholder="Digite o código (Ex: 123456)", id="codigo")
             yield Button("Confirmar Alteração", id="btn_confirmar", variant="primary")
